@@ -10,17 +10,14 @@ import datetime
 from marshmallow import exceptions
 import configparser
 
-def main(username, password, year, ausführungstermin, mandatenliste, split_year):
+def main(username, password, year, ausführungstermin, mandatenliste, split_year,
+         beitragvoll, beitragfamilienermäßigt, beitragsozialermäßigt):
     # use Colorama to make Termcolor work on Windows too
     init()
 
     lastschriftsequenz = 'wiederkehrend'                    # SEPA Lastschriftsequenz. Eigentlich immer wiederkehrend,
                                                             # das das SEPA Mandat immer bis zur Kündigung bestehen muss
                                                             # und die Abbuchung jährlich erfolgt
-    # Alle Beiträge in Euro
-    beitragvoll = 45                                        # Voller Beitrag in Euro der eingezogen werden soll
-    beitragfamilienermäßigt = 31.5                          # Familienermäßigter Beitrag in Euro der eingezogen werden soll
-    beitragsozialermäßigt = 13.8                            # Sozialermäßigter Beitrag in Euro der eingezogen werden soll
     stichtag_halbjahr = datetime.date(year, 6, 30)          # Stichtag definiert den Tag zwischen dem für beide Jahrehälften utnerschieden wird.
                                                             # Tritt jemand vor dem (einschließlich) 30.06 bei, so muss der volle Mitgliedsbeitrag entrichtet werden.
                                                             # Tritt jemand ab dem 01.07 bei, so muss nur der halbe Mitgliedsbeitrag entrichtet werden
@@ -50,7 +47,7 @@ def main(username, password, year, ausführungstermin, mandatenliste, split_year
         result = nami.search(**search)
         print(tabulate2x(result))
 
-        with open('mitglieder.csv', 'w', newline='') as f:
+        with open('MitgliederAbrechnung_' + str(year) + '.csv', 'w', newline='') as f:
             writer = csv.writer(f, delimiter=';')
 
             # Write header to file
@@ -270,6 +267,14 @@ if __name__ == "__main__":
     biannual_accounting = bool(config['General']['Biannual Accounting'])     # Auf True Setzen, wenn die Beiträge pro Halbjahr berechnet werden sollen
                                                                         # Kündigt jemand halbjährlich, oder steigt halbjährlich ein, so
                                                                         # muss auch nur der halbe Beitrag geleistet werden. Stichtag ist der 30.06 und 31.12
-    vr_networld_mandatenliste = 'VRExport_Aufträge_20220101_214611.csv'
-    main(username, password, year=year, ausführungstermin=termin, mandatenliste=vr_networld_mandatenliste, split_year=biannual_accounting)
+    vr_networld_mandatenliste = config['General']['Mandate Path']
+    beitragVoll = float(config['Membership Fee']['Full'])
+    beitragErmäßigt = float(config['Membership Fee']['Family'])
+    beitragSozial = float(config['Membership Fee']['Social'])
+    main(username, password, year=year, ausführungstermin=termin,
+         mandatenliste=vr_networld_mandatenliste,
+         split_year=biannual_accounting,
+         beitragvoll=beitragVoll,
+         beitragfamilienermäßigt=beitragErmäßigt,
+         beitragsozialermäßigt=beitragSozial)
 
