@@ -87,6 +87,7 @@ class VRMandat:
         else:
             return False
 
+
 class VRImport:
     mandate = []
 
