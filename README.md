@@ -87,3 +87,6 @@ Die Abzurechnende Mitgliedschaft muss immer einen Tag nachdem die Schnuppermitgl
 - Automatisches Mapping der Mandate zu den Mitgliedern über die Mitgliedernummer
 - Automatisches Anlegen der SEPA-Mandate bei neuen Mitgliedern
 - Erstellung einer offiziellen ISO20022 SEPA \*.xml Datei
+
+# Credits
+Dieses Projekt benutzt die pynami API von sscholz93, welche hier zu finden ist: https://github.com/sscholz93/pynami
