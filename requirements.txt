@@ -2,4 +2,4 @@ schwifty
 colorama
 termcolor
 marshmallow
-pdftotext
+pdfplumber

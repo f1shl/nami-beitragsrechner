@@ -5,6 +5,7 @@ Zurzeit ist nur eine jährliche Abrechnung am Ende des Jahres vorgesehen.
 Folgende Features werden zurzeit unterstützt:
 - Automatisches Generieren der SEPA-Lastschriftaufträge im korrekten Format für VR-Networld
 - Überprüfung von korrektem Mapping der SEPA-Mandate und der Nami Mitglieder
+- Überprüfung der erzeugten Lastschrifteinzüge mit der Rechnung vom DPSG Mitgliederservice
 - Korrekte Behandlung vom Beitragsatz (familienermäßigt, sozialermäßigt)
 - Korrekte Behandlung von Mitgliedern die unterjährig eingestiegen sind
 - Korrekte Behandlung von Schnuppermitgliedern und deren korrektes Eintrittsdatum für die Abrechnung
@@ -55,11 +56,34 @@ Dies kann zum Beispiel vorkommen, wenn das Datum der Schnuppermitgliedschaft 8 W
 Die Abzurechnende Mitgliedschaft muss immer einen Tag nachdem die Schnuppermitgliedschaft beendet wurde beginnen.
 
 # Config.ini
-tbd
+| Nami Login | | |
+|---| |---|
+| Username | | Benutzername für den DPSG Nami Login|
+| Password | | Passwort für den DPGS Nami Login|
+
+|General| ||
+|---| |---|
+|Accounting Year| | Jahr für das die Abbuchung erfolgen soll|
+|Accounting Half-Year|  |1 = Berechnung erfolgt für das erste Halbjahr, 2= Berechnung erfolgt für das zweite Halbjahr, 3 = Berechnung erfolgt für das ganze Jahr (Beides Halbjahre werden zusammen eingezogen)|
+| Booking Date | |Abbuchungstag. Dieses Datum wird als Einzugsdatum im SEPA Lastschrifteinzug verwendet|
+|Mandate Path|  |Pfad für Mandata Datei \*.csv, die aus VR-Networld exportiert wurde|
+
+|Key Dates| ||
+|---||---|
+|First Half-Year| |Stichtag des ersten Halbjahres. Angegebenes Datum zählt noch zum ersten Halbjahr|
+|Second Half-Year| |Stichtag des zweiten Halbjahres. Angegebenes Datum zählt noch zum zweiten Halbjahr|
+|Schnupper Weeks| |Gibt an wie lange ein Mitglied als Schnuppermitglied angemeldet sein kann. Das Eintrittsdatum wird um die angegebenen Wochen erhöht, woraus sich dann das Eintrittsdatum als Beitragspflichtiges Mitglied ergibt|
+
+|Membership Fees| ||
+|---||---|
+|Full| |Voller Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
+|Family| |Familienermäßigter Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
+|Social| |Sozialenermäßigter Mitgliedsbeitrag (Nur DPSG Anteil)|
 
 # Kommende Featureliste
-- Unterstützung der Abrechnung am Jahresanfang, zweimal im Jahr, oder zu einem gegebenen Stichtag.
-- Abgleich der Abrechnung mit der Abrechnung von der DPSG
+- PyQT GUI Oberfläche
+- Unterstützung der Abrechnung am Jahresanfang
 - Einfaches Handling von Mitgliedern die unterjährig ausgestiegen sind und die der Datenweiterverarbeitung nicht zugestimmt haben
 - Automatisches Mapping der Mandate zu den Mitgliedern über die Mitgliedernummer
 - Automatisches Anlegen der SEPA-Mandate bei neuen Mitgliedern
+- Erstellung einer offiziellen ISO20022 SEPA \*.xml Datei
