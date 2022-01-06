@@ -56,29 +56,29 @@ Dies kann zum Beispiel vorkommen, wenn das Datum der Schnuppermitgliedschaft 8 W
 Die Abzurechnende Mitgliedschaft muss immer einen Tag nachdem die Schnuppermitgliedschaft beendet wurde beginnen.
 
 # Config.ini
-| Nami Login | | |
-|---| |---|
-| Username | | Benutzername für den DPSG Nami Login|
-| Password | | Passwort für den DPGS Nami Login|
+| Nami Login | |
+| --- | --- |
+| Username | Benutzername für den DPSG Nami Login |
+| Password | Passwort für den DPGS Nami Login |
 
-|General| ||
-|---| |---|
-|Accounting Year| | Jahr für das die Abbuchung erfolgen soll|
-|Accounting Half-Year|  |1 = Berechnung erfolgt für das erste Halbjahr, 2= Berechnung erfolgt für das zweite Halbjahr, 3 = Berechnung erfolgt für das ganze Jahr (Beides Halbjahre werden zusammen eingezogen)|
-| Booking Date | |Abbuchungstag. Dieses Datum wird als Einzugsdatum im SEPA Lastschrifteinzug verwendet|
-|Mandate Path|  |Pfad für Mandata Datei \*.csv, die aus VR-Networld exportiert wurde|
+|General| |
+|---| ---|
+|Accounting Year|  Jahr für das die Abbuchung erfolgen soll|
+|Accounting Half-Year |1 = Berechnung erfolgt für das erste Halbjahr, 2= Berechnung erfolgt für das zweite Halbjahr, 3 = Berechnung erfolgt für das ganze Jahr (Beides Halbjahre werden zusammen eingezogen)|
+| Booking Date | Abbuchungstag. Dieses Datum wird als Einzugsdatum im SEPA Lastschrifteinzug verwendet|
+|Mandate Path| Pfad für Mandata Datei \*.csv, die aus VR-Networld exportiert wurde|
 
-|Key Dates| ||
-|---||---|
-|First Half-Year| |Stichtag des ersten Halbjahres. Angegebenes Datum zählt noch zum ersten Halbjahr|
-|Second Half-Year| |Stichtag des zweiten Halbjahres. Angegebenes Datum zählt noch zum zweiten Halbjahr|
-|Schnupper Weeks| |Gibt an wie lange ein Mitglied als Schnuppermitglied angemeldet sein kann. Das Eintrittsdatum wird um die angegebenen Wochen erhöht, woraus sich dann das Eintrittsdatum als Beitragspflichtiges Mitglied ergibt|
+|Key Dates| |
+|---|---|
+|First Half-Year|Stichtag des ersten Halbjahres. Angegebenes Datum zählt noch zum ersten Halbjahr|
+|Second Half-Year|Stichtag des zweiten Halbjahres. Angegebenes Datum zählt noch zum zweiten Halbjahr|
+|Schnupper Weeks|Gibt an wie lange ein Mitglied als Schnuppermitglied angemeldet sein kann. Das Eintrittsdatum wird um die angegebenen Wochen erhöht, woraus sich dann das Eintrittsdatum als Beitragspflichtiges Mitglied ergibt|
 
-|Membership Fees| ||
-|---||---|
-|Full| |Voller Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
-|Family| |Familienermäßigter Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
-|Social| |Sozialenermäßigter Mitgliedsbeitrag (Nur DPSG Anteil)|
+|Membership Fees||
+|---|---|
+|Full|Voller Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
+|Family|Familienermäßigter Mitgliedsbeitrag (DPSG + individueller Stammesbeitrag)|
+|Social|Sozialenermäßigter Mitgliedsbeitrag (Nur DPSG Anteil)|
 
 # Kommende Featureliste
 - PyQT GUI Oberfläche
