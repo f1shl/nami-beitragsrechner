@@ -12,7 +12,7 @@ Folgende Features werden zurzeit unterstützt:
 - Möglichkeit die Beiträge pro Jahr, oder pro Halbjahr zu berechnen
 - Überprüfung auf korrekte IBAN und BIC
 
-![Screenshot](./img/screenshot.PNG)
+![Screenshot](./img/overall.png)
 
 # Requirements
 Folgende Dinge werden benötigt, damit das Skripot funktioniert:
