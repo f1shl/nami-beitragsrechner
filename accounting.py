@@ -261,7 +261,7 @@ class NamiAccounting:
                     list_of_members_booked_here_but_not_by_dpsg.append(member)
 
                 # Zu zahlender Beitrag
-                row.append(beitragsatz)
+                row.append(str(beitragsatz).replace('.', ','))
 
                 # Now search for the correct Mandat in Mandatenliste
                 mandat = vrImport.find_correct_mandat(member)
