@@ -2,6 +2,7 @@ import csv
 from pynami.nami import NaMi
 import tools
 
+
 class VRMandat:
     headerdict = {
         "Bezeichnung" : 0,
@@ -14,17 +15,6 @@ class VRMandat:
         "Zahler BIC" : 0,
         "Mandatsstatus" : 0
     }
-
-    bezeichnung = ''
-    mandatsreferenz = ''
-    mandatsdatum = ''
-    lastschriftsequenz = ''
-    nachname = ''
-    vorname = ''                # Vorname wird von VR-Networld wohl nciht benutzt. Zumidnest ist das Feld beim Export immer leer
-    iban = ''
-    bic = ''
-    mandatsstatus = ''
-    used = False                # Defines if the Mandat was used at least once. This is useful to find unused Mandate and for double check
 
     def __init__(self, header, csv_row):
         # Extract header
@@ -41,6 +31,7 @@ class VRMandat:
         except Exception as e:
             raise ValueError('Benötigte Spalte fehlt in der exportierten Mandatenliste aus VR-Networld: ' + str(e))
 
+        self.used = False  # Defines if the Mandat was used at least once. This is useful to find unused Mandate and for double check
         self.bezeichnung = csv_row[self.headerdict["Bezeichnung"]]
         self.mandatsreferenz = csv_row[self.headerdict["Mandatsreferenz"]]
         self.mandatsdatum = csv_row[self.headerdict["Mandatsdatum"]]
@@ -89,9 +80,8 @@ class VRMandat:
 
 
 class VRImport:
-    mandate = []
-
     def __init__(self, csv_path):
+        self.mandate = []
         with open(csv_path, 'r', newline='') as f:
             reader = csv.reader(f, delimiter=';')
             header = []
