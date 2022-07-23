@@ -2,6 +2,10 @@ import os
 import pdfplumber
 import re
 import datetime
+import logging
+
+# Set the loglevel of pdfplumber to warning to avoid unnecessary log messages
+logging.getLogger("pdfminer").setLevel(logging.WARNING)
 
 
 class PdfMember:
