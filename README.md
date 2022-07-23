@@ -1,8 +1,12 @@
 # README
-Dieses kleine Python Skript wwandelt die Daten der Nami automatisch um und konvertiert diese in eine exportierbare *.csv Datei, welche dann im VR-Networld Tool importiert werden kann. Dabei werden die Daten von der Nami direkt über die API heruntergeladen. Deshalb müssen auch der Benutzername und das Passwort für die Nami im Skript hinterlegt werden.
-Zurzeit ist nur eine jährliche Abrechnung am Ende des Jahres vorgesehen.
+Diese Python Programm stellt eine grafische Oberfläche zur Verfügung, welche die halbjährliche Mitgliedsabrechnung automatisiert.
+Dabei werden die aktiven Mitglieder aus der Nami automatisch 
+heruntergalden, mit den Rechnungen des DPSG abgeglichen und 
+eine entsprechende *.csv Datei mit allen Lastschrifteinzügen 
+erstellt, welche dann im VR Networld Programm eingelesen werden kann.
 
 Folgende Features werden zurzeit unterstützt:
+- Tkinter GUI mit Sun Valley Design (https://github.com/rdbende/Sun-Valley-ttk-theme)
 - Automatisches Generieren der SEPA-Lastschriftaufträge im korrekten Format für VR-Networld
 - Überprüfung von korrektem Mapping der SEPA-Mandate und der Nami Mitglieder
 - Überprüfung der erzeugten Lastschrifteinzüge mit der Rechnung vom DPSG Mitgliederservice
@@ -13,7 +17,7 @@ Folgende Features werden zurzeit unterstützt:
 - Möglichkeit die Beiträge pro Jahr, oder pro Halbjahr zu berechnen
 - Überprüfung auf korrekte IBAN und BIC
 
-![Screenshot](./img/overall.png)
+![Screenshot](./img/gui.png)
 
 # Requirements
 Folgende Dinge werden benötigt, damit das Skripot funktioniert:
@@ -22,8 +26,6 @@ Folgende Dinge werden benötigt, damit das Skripot funktioniert:
 - pynami Package für den API Zugriff (https://pynami.readthedocs.io/en/latest/installation.html und https://github.com/sscholz93/pynami)
 - Alle packages aus dem requirements.txt. Dazu eine Powershell im Repository root Ordner öffnen und folgenden Befehl ausführen: 
 *pip install -r requirements.txt* 
-- Passwort und Benutzername in der *config.ini* Datei anpassen
-- Restlicher Parameter in der *config.ini* anpassen
 
 # Usage
 Damit der Export problemlos funktioniert, ist es wichtig, dass die Nami Datenbank gepflegt und aktuell ist. Die Nami Datenbank stellt dabei den Master dar und gibt auch die Kontodaten vor. Einzig die Mandate werden im VR-Networld neu angelegt. Das Skript versucht dann für jede Person ein passendes Mandat zu finden.
@@ -81,7 +83,6 @@ Die Abzurechnende Mitgliedschaft muss immer einen Tag nachdem die Schnuppermitgl
 |Social|Sozialenermäßigter Mitgliedsbeitrag (Nur DPSG Anteil)|
 
 # Kommende Featureliste
-- PyQT GUI Oberfläche
 - Unterstützung der Abrechnung am Jahresanfang
 - Einfaches Handling von Mitgliedern die unterjährig ausgestiegen sind und die der Datenweiterverarbeitung nicht zugestimmt haben
 - Automatisches Mapping der Mandate zu den Mitgliedern über die Mitgliedernummer

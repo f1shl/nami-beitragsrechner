@@ -3,3 +3,5 @@ colorama
 termcolor
 marshmallow
 pdfplumber
+sv_ttk
+tkcalendar
