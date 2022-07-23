@@ -366,8 +366,3 @@ class NamiAccounting:
                      m.datumBis <= self._config.get_key_date_second_half():
                     members_new.append(m)
         return members_new
-
-
-if __name__ == "__main__":
-    m = NamiAccounting('config.ini')
-    m.process()
