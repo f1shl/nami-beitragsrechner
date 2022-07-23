@@ -242,7 +242,7 @@ class NamiAccounting:
         else:
             tools.print_error(
                 'Nicht alle SEPA-Mandate wurden verwendet. Nochmal die Mandate überprüfen und ggf. bereinigen.')
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('-------------------------------------------------------------------------------')
         print("")
 
         self.print_member_entry_this_year_as_schnupper(list_of_members_this_year_schnupper)
@@ -257,95 +257,74 @@ class NamiAccounting:
         self.print_member_not_booked_by_dpsg(list_of_members_booked_here_but_not_by_dpsg)
 
     def print_missing_mandate_members(self, members):
-
-        if len(members) == 0:
-            return
-
         tools.print_error('--------------------------- Fehlende Mandate ---------------------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_error('Mitgliedsnummer: ' + str(m.mitgliedsNummer) + ' Name: ' + combinedName)
-        tools.print_error('------------------------------------------------------------------------')
-        tools.print_error('Bitte die fehlenden Mandate in VR Networld für die Mitglieder anlegen.')
+        tools.print_error('-----------------------------------------------------------------------------')
+        if len(members) != 0:
+            tools.print_error('Bitte die fehlenden Mandate in VR Networld für die Mitglieder anlegen.')
         print("")
 
     def print_not_used_mandate(self, mandate: VRMandat):
-
-        if len(mandate) == 0:
-            return
-
         tools.print_error('----------------------- Nicht verwendete Mandate -----------------------')
         for m in mandate:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_error('Mandatsreferenz: ' + m.mandatsreferenz + ' Name: ' + combinedName)
-        tools.print_error('------------------------------------------------------------------------')
-        tools.print_error('Bitte nochmal die DPSG Nami und VR-Networld überprüfen und die nicht verwendenten Mandate entfernen.')
+        tools.print_error('-------------------------------------------------------------------------------')
+        if len(mandate) != 0:
+            tools.print_error('Bitte nochmal die DPSG Nami und VR-Networld überprüfen und die nicht verwendenten Mandate entfernen.')
         print("")
 
     def print_member_entry_this_year_as_schnupper(self, members):
-        if len(members) == 0:
-            return
-
         tools.print_info('-------------- Schnuppermitglieder Jahr ' + str(self._config.get_accounting_year()) + ' --------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------')
         print("")
 
     def print_member_entry_second_half(self, members):
-        if len(members) == 0:
-            return
-
         tools.print_info('----------------- Mitglieder zweite Jahreshälfte ' + str(self._config.get_accounting_year()) + ' ------------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('-----------------------------------------------------------------------------------------')
         print("")
 
 
     def print_member_entry_new_year(self, members):
-        if len(members) == 0:
-            return
-
         tools.print_info('--------------------- Mitglieder im neuen Jahr ' + str(self._config.get_accounting_year()+1) + ' --------------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------------')
         print("")
 
     def print_member_booked_by_dpsg_but_not_here(self, members):
-        if len(members) == 0:
-            return
-
         tools.print_info('-------- Mitglieder die von DPSG gebucht wurden aber nicht hier --------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Rechnungsdatum: ' + datetime.datetime.strftime(m.datumVon, self._config.get_datetime_format()) +
                              ' - ' + datetime.datetime.strftime(m.datumBis, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------------------')
         print("")
 
     def print_member_not_booked_by_dpsg(self, members):
-        if len(members) == 0:
-            return
-
         tools.print_info('------ Mitglieder die hier gebucht wurden aber nicht von der DPSG ------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------------------')
         print("")
 
     def download_invoices(self) -> PdfMemberList:

@@ -173,8 +173,8 @@ class Config:
             self._config.set('Key Dates', 'schnupper weeks', '8')
 
         if (self._config.has_option('Membership Fee', 'full')) is False:
-            self._config.set('Membership Fee', 'full', '45')
+            self._config.set('Membership Fee', 'full', '')
         if (self._config.has_option('Membership Fee', 'family')) is False:
-            self._config.set('Membership Fee', 'family', '31.50')
+            self._config.set('Membership Fee', 'family', '')
         if (self._config.has_option('Membership Fee', 'social')) is False:
-            self._config.set('Membership Fee', 'social', '13.80')
+            self._config.set('Membership Fee', 'social', '')

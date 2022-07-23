@@ -46,7 +46,7 @@ class App(ttk.Frame):
         self.grid_rowconfigure(2, weight=0)
 
         self.frame_login = ttk.LabelFrame(self, text="Login", padding=(10, 10))
-        self.frame_login.grid(row=0, column=0, sticky="nsew", padx=(10,0), pady=(10,0))
+        self.frame_login.grid(row=0, column=0, sticky="nsew", padx=(10,0), pady=(1,0)) # Pad one pixel to align it with the TreeView widget
         self.frame_login.grid_columnconfigure(0, weight=1)
         self.frame_login.grid_rowconfigure(0, weight=0)
 
@@ -97,6 +97,10 @@ class App(ttk.Frame):
                                                 command=self.nami_login)
         self.loginButton.grid(row=4, column=0, padx=0, pady=5, sticky="nsew")
 
+        self.dpsgImage = tk.PhotoImage(file='dpsg_logo.png')
+        self.dpsgImageLabel = ttk.Label(master=self.frame_login, image=self.dpsgImage, anchor="w")
+        self.dpsgImageLabel.grid(row=5, column=0, padx=0, pady=(5,0))
+
         # ============ accountingFrame ============
         self.bookingYearLabel = ttk.Label(master=self.accountingFrame, text="Buchungsjahr", anchor="w")
         self.bookingYearLabel.grid(row=0, column=0, columnspan=2, padx=0, pady=(5,0), sticky="nsew")
@@ -106,7 +110,7 @@ class App(ttk.Frame):
         self.yearOptionMenu = ttk.OptionMenu(self.accountingFrame, self.yearOptionVar, self._config.get_accounting_year(), *choices, command=self.year_option_changed)
         self.yearOptionMenu.grid(row=1, column=0, columnspan=2, padx=0, pady=5, sticky="nsew")
 
-        self.bookingPeriodLabel = ttk.Label(master=self.accountingFrame, text="Halbjahr", anchor="w")
+        self.bookingPeriodLabel = ttk.Label(master=self.accountingFrame, text="Buchungsturnus", anchor="w")
         self.bookingPeriodLabel.grid(row=2, column=0, columnspan=2, padx=0, pady=(5,0), sticky="nsew")
         self.bookingPeriodOptionVar = tk.StringVar(self)
         self.bookingPeriodOptions = ['Erstes Halbjahr', 'Zweites Halbjahr', 'Beide']
@@ -115,7 +119,7 @@ class App(ttk.Frame):
                                                       command=self.booking_period_option_changed)
         self.bookingPeriodOptionMenu.grid(row=3, column=0, columnspan=2, padx=0, pady=5, sticky="nsew")
 
-        self.bookingDateLabel = ttk.Label(master=self.accountingFrame, text="Buchungsdatum", anchor="w")
+        self.bookingDateLabel = ttk.Label(master=self.accountingFrame, text="Fälligkeitsdatum", anchor="w")
         self.bookingDateLabel.grid(row=4, column=0, columnspan=2, padx=0, pady=(5,0), sticky="nsew")
         self.bookingDateCalendar = DateEntry(self.accountingFrame, selectmode='none', date_pattern='dd.mm.yyyy')
         self.bookingDateCalendar.set_date(self._config.get_accounting_date())
@@ -259,6 +263,7 @@ class App(ttk.Frame):
             self.monitor(process)
 
     def on_closing(self, event=0):
+        del self._nami
         self.save()
         self._parent.destroy()
 
@@ -303,7 +308,7 @@ def main():
 
     width, height = root.winfo_width(), root.winfo_height()
     width = 1110
-    height = 720
+    height = 735
     x = int((root.winfo_screenwidth() / 2) - (width / 2))
     y = int((root.winfo_screenheight() / 2) - (height / 2))
 
