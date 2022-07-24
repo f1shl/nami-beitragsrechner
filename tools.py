@@ -3,6 +3,8 @@ import logging
 import configparser
 from enum import IntEnum
 import datetime
+from schwifty import IBAN, BIC
+
 
 def print_error(text):
     logging.error(text)
@@ -51,6 +53,13 @@ class MembershipFees:
 
     def get_fee_social_annual(self):
         return self._feeSocial
+
+class SepaWrapper:
+    def __init__(self, name, iban, bic, id):
+        self.name = name
+        self.iban = iban
+        self.bic = bic
+        self.id = id
 
 
 class Config:
@@ -139,6 +148,17 @@ class Config:
         datetimeFormat = datetimeFormat.replace('%', '%%') # Use double percent char to escape the basic inteprolation method of ConfigParser
         self._config['General']['Datetime format'] = datetimeFormat
 
+    def get_creditor_id(self) -> SepaWrapper:
+        return SepaWrapper(self._config['Creditor ID']['name'], self._config['Creditor ID']['iban'],
+                           self._config['Creditor ID']['bic'], self._config['Creditor ID']['id'])
+
+    def set_creditor_id(self, sepa:SepaWrapper):
+        self._config['Creditor ID']['name'] = sepa.name
+        self._config['Creditor ID']['iban'] = sepa.iban
+        self._config['Creditor ID']['bic'] = sepa.bic
+        self._config['Creditor ID']['id'] = sepa.id
+
+
     def update_config(self):
         if (self._config.has_section('Nami Login')) is False:
             self._config.add_section('Nami Login')
@@ -148,6 +168,8 @@ class Config:
             self._config.add_section('Key Dates')
         if (self._config.has_section('Membership Fee')) is False:
             self._config.add_section('Membership Fee')
+        if (self._config.has_section('Creditor ID')) is False:
+            self._config.add_section('Creditor ID')
 
         if (self._config.has_option('Nami Login', 'username')) is False:
             self._config.set('Nami Login', 'username', '')
@@ -178,3 +200,12 @@ class Config:
             self._config.set('Membership Fee', 'family', '')
         if (self._config.has_option('Membership Fee', 'social')) is False:
             self._config.set('Membership Fee', 'social', '')
+
+        if (self._config.has_option('Creditor ID', 'name')) is False:
+            self._config.set('Creditor ID', 'name', '')
+        if (self._config.has_option('Creditor ID', 'iban')) is False:
+            self._config.set('Creditor ID', 'iban', '')
+        if (self._config.has_option('Creditor ID', 'bic')) is False:
+            self._config.set('Creditor ID', 'bic', '')
+        if (self._config.has_option('Creditor ID', 'id')) is False:
+            self._config.set('Creditor ID', 'id', '')
