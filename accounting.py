@@ -9,6 +9,7 @@ from pathlib import Path
 import logging
 import tkinter as tk
 from nami import Nami
+from sepa import Sepa
 
 # Set the loglevel of pdfplumber to warning to avoid unnecessary log messages
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -48,10 +49,11 @@ class DesignatedUse:
 
 
 class NamiAccounting:
-    def __init__(self, config:tools.Config, memberTree, nami:Nami):
+    def __init__(self, config:tools.Config, memberTree, nami:Nami, sepa:Sepa):
         self._config = config
         self._memberTree = memberTree
         self._nami = nami
+        self._sepa = sepa
 
     def process(self):
         vrImport = VRImport(self._config.get_position_file())
@@ -71,6 +73,7 @@ class NamiAccounting:
         list_of_members_second_half_of_year = []
         list_of_members_in_new_year = []  # Liste von Mitgliedern die erst im neuen Jahr dazu gekommen sind.
         list_of_members_booked_here_but_not_by_dpsg = []
+        list_of_members_wrong_sepa = []
         # Wenn für 2021 abgebucht wird, so darf kein Mitglied von 2022 gebucht werden
         list_of_members_this_year_schnupper = []
         nof_claimed_members = 0  # Zähler, wieviele Mitglieder gebucht werden
@@ -199,6 +202,12 @@ class NamiAccounting:
             row.append(verwendungszweck)
             # Write to CSV file
             writer.writerow(row)
+            # Additional, write to the SEPA XML file
+            b = self._sepa.add_member(member, beitragsatz, mandat, self._config.get_accounting_date_str(), verwendungszweck)
+            if b is False:
+                list_of_members_wrong_sepa.append(member)
+                tools.print_error('Mitglied ' + member.vorname + ' ' + member.nachname + ': SEPA Generierung schlug fehl.')
+
             nof_claimed_members = nof_claimed_members + 1
 
             booking_value = booking_value + beitragsatz
@@ -209,7 +218,13 @@ class NamiAccounting:
                            member.kontoverbindung.iban, str(beitragsatz) + ' €')
             self._memberTree.insert('', tk.END, values=memberTuple)
 
-            # Info printing
+
+        # Write SEPA XML file
+        success = self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
+        if success is False:
+            tools.print_error('SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
+
+        # Info printing
         used = vrImport.get_nof_used_mandate()
         overall = vrImport.get_nof_mandate()
         not_used = overall - used

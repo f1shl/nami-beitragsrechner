@@ -6,15 +6,17 @@ import LoggingHandlerFrame as loggingFrame
 from accounting import NamiAccounting
 from threading import Thread
 from nami import Nami
-from tools import Config, BookingHalfYear, MembershipFees
+from tools import Config, BookingHalfYear, MembershipFees, SepaWrapper
 print = logging.info
 import datetime as dt
 from tkcalendar import Calendar, DateEntry
+from sepa import Sepa
+from schwifty import IBAN
 
 class RunAccounting(Thread):
-    def __init__(self, config:Config, memberTree, nami: Nami):
+    def __init__(self, config:Config, memberTree, nami: Nami, sepa: Sepa):
         super().__init__()
-        self.m = NamiAccounting(config, memberTree, nami)
+        self.m = NamiAccounting(config, memberTree, nami, sepa)
 
     def run(self):
         self.m.process()
@@ -26,6 +28,7 @@ class App(ttk.Frame):
         self._parent = parent
         # Init
         self._nami = None
+        self._sepa = None
 
         parent.protocol("WM_DELETE_WINDOW", self.on_closing)
         # Bind shortcuts
@@ -58,8 +61,10 @@ class App(ttk.Frame):
 
         self.accountingFrame = ttk.Frame(master=self.configNotebook, padding=(10,10))
         self.feesFrame = ttk.Frame(master=self.configNotebook, padding=(10,10))
+        self.creditorFrame = ttk.Frame(master=self.configNotebook, padding=(10, 10))
         self.configNotebook.add(self.accountingFrame, text='Buchung')
         self.configNotebook.add(self.feesFrame, text='Beiträge')
+        self.configNotebook.add(self.creditorFrame, text='Gläubiger ID')
         self.configNotebook.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(10, 10))
 
         self.frame_logging = loggingFrame.LoggingHandlerFrame(self, text="Info", padding=(10, 10))
@@ -77,11 +82,11 @@ class App(ttk.Frame):
         #                                      text="Konfiguration",
         #                                      text_font=("Roboto Medium", -16))  # font name and size in px
         #self.label_1.grid(row=1, column=0)
-
+        vcmd = (self.register(self.validate_int))
         self.usernameLabel = ttk.Label(master=self.frame_login, text="Nami Nummer", anchor="w")
         self.usernameLabel.grid(row=0, column=0, padx=0, pady=(5,0), sticky="nsew")
 
-        self.usernameEntry = ttk.Entry(master=self.frame_login)
+        self.usernameEntry = ttk.Entry(master=self.frame_login, validate='all', validatecommand=(vcmd, '%P'))
         self.usernameEntry.grid(row=1, column=0, padx=0, pady=5, sticky="nsew")
         self.usernameEntry.insert(tk.END, self._config.get_nami_username())
 
@@ -152,35 +157,65 @@ class App(ttk.Frame):
         self.feeSeparator = ttk.Separator(master=self.feesFrame,orient='horizontal')
         self.feeSeparator.grid(row=1, column=0, columnspan=2, padx=0, pady=(0, 0), sticky="nsew")
 
+        vcmd = (self.register(self.validate_float))
         self.fullFeeLabel = ttk.Label(master=self.feesFrame, text="Voller Beitrag", anchor="w")
         self.fullFeeLabel.grid(row=2, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
-        self.fullFeeEntry = ttk.Entry(master=self.feesFrame)
-        self.fullFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
-        self.fullFeeCurrencyLabel.grid(row=3, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
-        self.fullFeeEntry = ttk.Entry(master=self.feesFrame)
+        self.fullFeeEntry = ttk.Entry(master=self.feesFrame, validate='all', validatecommand=(vcmd, '%P'))
         fees = self._config.get_membership_fees()
         self.fullFeeEntry.insert(tk.END, str(fees.get_fee_full_annual()))
         self.fullFeeEntry.grid(row=3, column=0, padx=0, pady=5)
+        self.fullFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
+        self.fullFeeCurrencyLabel.grid(row=3, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
 
         self.familyFeeLabel = ttk.Label(master=self.feesFrame, text="Familienermäßigt", anchor="w")
         self.familyFeeLabel.grid(row=4, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
-        self.familyFeeEntry = ttk.Entry(master=self.feesFrame)
-        self.familyFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
-        self.familyFeeCurrencyLabel.grid(row=5, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
-        self.familyFeeEntry = ttk.Entry(master=self.feesFrame)
+        self.familyFeeEntry = ttk.Entry(master=self.feesFrame, validate='all', validatecommand=(vcmd, '%P'))
         fees = self._config.get_membership_fees()
         self.familyFeeEntry.insert(tk.END, str(fees.get_fee_family_annual()))
         self.familyFeeEntry.grid(row=5, column=0, padx=0, pady=5)
+        self.familyFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
+        self.familyFeeCurrencyLabel.grid(row=5, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
 
         self.socialFeeLabel = ttk.Label(master=self.feesFrame, text="Sozialermäßigt", anchor="w")
         self.socialFeeLabel.grid(row=6, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
-        self.socialFeeEntry = ttk.Entry(master=self.feesFrame)
-        self.socialFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
-        self.socialFeeCurrencyLabel.grid(row=7, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
-        self.socialFeeEntry = ttk.Entry(master=self.feesFrame)
+        self.socialFeeEntry = ttk.Entry(master=self.feesFrame, validate='all', validatecommand=(vcmd, '%P'))
         fees = self._config.get_membership_fees()
         self.socialFeeEntry.insert(tk.END, str(fees.get_fee_social_annual()))
         self.socialFeeEntry.grid(row=7, column=0, padx=0, pady=5)
+        self.socialFeeCurrencyLabel = ttk.Label(master=self.feesFrame, text="€", anchor="w")
+        self.socialFeeCurrencyLabel.grid(row=7, column=1, padx=(5, 0), pady=(5, 0), sticky="nsew")
+
+        # ============ creditorFrame ================
+        sepa = self._config.get_creditor_id()
+        self.creditorNameLabel = ttk.Label(master=self.creditorFrame, text="Name", anchor="w")
+        self.creditorNameLabel.grid(row=0, column=0, padx=0, pady=(5,0), sticky="nsew")
+        self.creditorNameEntry = ttk.Entry(master=self.creditorFrame, width=30)
+        self.creditorNameEntry.grid(row=1, column=0, padx=0, pady=5, sticky="nsew")
+        self.creditorNameEntry.insert(tk.END, sepa.name)
+
+        self.creditorIbanLabel = ttk.Label(master=self.creditorFrame, text="IBAN", anchor="w")
+        self.creditorIbanLabel.grid(row=2, column=0, padx=0, pady=(5,0), sticky="nsew")
+        self.creditorIbanEntry = ttk.Entry(master=self.creditorFrame)
+        self.creditorIbanEntry.grid(row=3, column=0, padx=0, pady=5, sticky="nsew")
+        self.creditorIbanEntry.insert(tk.END, sepa.iban)
+
+        self.creditorIbanEntry.bind('<FocusOut>', self.validate_iban)
+        self.creditorIbanEntry.bind('<FocusIn>', self.validate_iban)
+        self.creditorIbanEntry.bind('<KeyRelease>', self.validate_iban)
+
+        self.creditorBicLabel = ttk.Label(master=self.creditorFrame, text="BIC", anchor="w")
+        self.creditorBicLabel.grid(row=4, column=0, padx=0, pady=(5,0), sticky="nsew")
+        self.creditorBicEntry = ttk.Entry(master=self.creditorFrame, state='disabled')
+        self.creditorBicEntry.grid(row=5, column=0, padx=0, pady=5, sticky="nsew")
+        self.creditorBicEntry.insert(tk.END, sepa.bic)
+
+        self.creditorIdLabel = ttk.Label(master=self.creditorFrame, text="Gläubiger ID", anchor="w")
+        self.creditorIdLabel.grid(row=6, column=0, padx=0, pady=(5,0), sticky="nsew")
+        self.creditorIdEntry = ttk.Entry(master=self.creditorFrame)
+        self.creditorIdEntry.grid(row=7, column=0, padx=0, pady=5, sticky="nsew")
+        self.creditorIdEntry.insert(tk.END, sepa.id)
+
+        self.validate_iban()
 
         # ============ frame_members ============
         columns = ('member_number', 'first_name', 'last_name', 'start_date', 'iban', 'fee')
@@ -258,9 +293,17 @@ class App(ttk.Frame):
         if self._nami is None:
             self.nami_login()
         if self._nami is not None:
-            process = RunAccounting(self._config, self.memberTree, self._nami)
+            self._sepa = None
+            s = self._config.get_creditor_id()
+            self._sepa = Sepa(s.name, s.iban, s.bic, s.id)
+            if self._sepa.check_config() is False:
+                logging.error('Gläubiger Identifikation inkorrekt. Bitte nochmal die Daten überprüfen.')
+                return
+
+            process = RunAccounting(self._config, self.memberTree, self._nami, self._sepa)
             process.start()
             self.monitor(process)
+
 
     def on_closing(self, event=0):
         del self._nami
@@ -273,6 +316,8 @@ class App(ttk.Frame):
         self._config.set_nami_password(self.passwordEntry.get())
         self._config.set_accounting_date(self.bookingDateCalendar.get_date())
         self._config.set_position_file(self.mandatePathEntry.get())
+        sepa = SepaWrapper(self.creditorNameEntry.get(), self.creditorIbanEntry.get(), self.creditorBicEntry.get(), self.creditorIdEntry.get())
+        self._config.set_creditor_id(sepa)
         self._config.save()
         logging.debug('Konfiguration gespeichert')
 
@@ -293,6 +338,33 @@ class App(ttk.Frame):
         tv.heading(col, command=lambda _col=col: \
             self.treeview_sort_column(tv, _col, not reverse))
 
+    def validate_iban(self, event=0):
+        try:
+            iban = IBAN(self.creditorIbanEntry.get())
+            self.creditorIbanEntry.state(['!invalid'])
+            self.creditorBicEntry.configure(state='enable')
+            self.creditorBicEntry.delete(0, tk.END)
+            self.creditorBicEntry.insert(tk.END, iban.bic)
+            self.creditorBicEntry.configure(state='disable')
+        except ValueError:
+            self.creditorIbanEntry.state(['invalid'])
+            self.creditorBicEntry.configure(state='enable')
+            self.creditorBicEntry.delete(0, tk.END)
+            self.creditorBicEntry.configure(state='disable')
+
+    def validate_float(self, P):
+        try:
+            float(P)
+            return True
+        except:
+            return False
+
+    def validate_int(self, P):
+        try:
+            int(P)
+            return True
+        except:
+            return False
 
 def main():
     root = tk.Tk()
