@@ -220,7 +220,10 @@ class NamiAccounting:
 
 
         # Write SEPA XML file
-        self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
+        success = self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
+        if success is False:
+            tools.print_error('SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
+
         # Info printing
         used = vrImport.get_nof_used_mandate()
         overall = vrImport.get_nof_mandate()

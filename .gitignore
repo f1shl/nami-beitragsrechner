@@ -4,6 +4,7 @@ config.ini
 invoices/
 *.pdf
 *.csv
+*.xml
 
 ### Python template
 # Byte-compiled / optimized / DLL files

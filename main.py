@@ -293,14 +293,17 @@ class App(ttk.Frame):
         if self._nami is None:
             self.nami_login()
         if self._nami is not None:
-            if self._sepa is None:
-                s = self._config.get_creditor_id()
-                self._sepa = Sepa(s.name, s.iban, s.bic, s.id)
-                b = self._sepa.check_config()
-            logging.debug('Start')
+            self._sepa = None
+            s = self._config.get_creditor_id()
+            self._sepa = Sepa(s.name, s.iban, s.bic, s.id)
+            if self._sepa.check_config() is False:
+                logging.error('Gläubiger Identifikation inkorrekt. Bitte nochmal die Daten überprüfen.')
+                return
+
             process = RunAccounting(self._config, self.memberTree, self._nami, self._sepa)
             process.start()
             self.monitor(process)
+
 
     def on_closing(self, event=0):
         del self._nami
