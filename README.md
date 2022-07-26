@@ -7,9 +7,10 @@ erstellt, welche dann im VR Networld Programm eingelesen werden kann.
 
 Folgende Features werden zurzeit unterstützt:
 - Tkinter GUI mit Sun Valley Design (https://github.com/rdbende/Sun-Valley-ttk-theme)
+- Erstellung einer offiziellen ISO20022 SEPA \*.xml Datei
 - Automatisches Generieren der SEPA-Lastschriftaufträge im korrekten Format für VR-Networld
+- Abgleich der erzeugten Lastschrifteinzüge mit der Rechnung vom DPSG Mitgliederservice
 - Überprüfung von korrektem Mapping der SEPA-Mandate und der Nami Mitglieder
-- Überprüfung der erzeugten Lastschrifteinzüge mit der Rechnung vom DPSG Mitgliederservice
 - Korrekte Behandlung vom Beitragsatz (familienermäßigt, sozialermäßigt)
 - Korrekte Behandlung von Mitgliedern die unterjährig eingestiegen sind
 - Korrekte Behandlung von Schnuppermitgliedern und deren korrektes Eintrittsdatum für die Abrechnung
@@ -87,7 +88,6 @@ Die Abzurechnende Mitgliedschaft muss immer einen Tag nachdem die Schnuppermitgl
 - Einfaches Handling von Mitgliedern die unterjährig ausgestiegen sind und die der Datenweiterverarbeitung nicht zugestimmt haben
 - Automatisches Mapping der Mandate zu den Mitgliedern über die Mitgliedernummer
 - Automatisches Anlegen der SEPA-Mandate bei neuen Mitgliedern
-- Erstellung einer offiziellen ISO20022 SEPA \*.xml Datei
 
 # Credits
 Dieses Projekt benutzt die pynami API von sscholz93, welche hier zu finden ist: https://github.com/sscholz93/pynami
