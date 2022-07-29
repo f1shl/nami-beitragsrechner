@@ -1,5 +1,4 @@
 import csv
-from pynami.nami import NaMi
 import tools
 
 

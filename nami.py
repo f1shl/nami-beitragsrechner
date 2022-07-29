@@ -20,6 +20,8 @@ class Nami:
 
         try:
             nami = NaMi()
+            if not self._username or not self._password:
+                raise NamiResponseSuccessError
             nami.auth(username=self._username, password=self._password)
             logging.debug('Verbindung zur Nami erfolgreich.')
             self._loginSuccessful = True

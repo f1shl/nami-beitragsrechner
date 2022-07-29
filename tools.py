@@ -1,9 +1,7 @@
-from termcolor import colored
 import logging
 import configparser
 from enum import IntEnum
 import datetime
-from schwifty import IBAN, BIC
 
 
 def print_error(text):
@@ -195,11 +193,11 @@ class Config:
             self._config.set('Key Dates', 'schnupper weeks', '8')
 
         if (self._config.has_option('Membership Fee', 'full')) is False:
-            self._config.set('Membership Fee', 'full', '')
+            self._config.set('Membership Fee', 'full', '0')
         if (self._config.has_option('Membership Fee', 'family')) is False:
-            self._config.set('Membership Fee', 'family', '')
+            self._config.set('Membership Fee', 'family', '0')
         if (self._config.has_option('Membership Fee', 'social')) is False:
-            self._config.set('Membership Fee', 'social', '')
+            self._config.set('Membership Fee', 'social', '0')
 
         if (self._config.has_option('Creditor ID', 'name')) is False:
             self._config.set('Creditor ID', 'name', '')

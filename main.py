@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, IntVar
 import sv_ttk
 import logging
 import LoggingHandlerFrame as loggingFrame
@@ -11,7 +11,8 @@ print = logging.info
 import datetime as dt
 from tkcalendar import Calendar, DateEntry
 from sepa import Sepa
-from schwifty import IBAN
+from schwifty import IBAN, BIC
+from os import path
 
 class RunAccounting(Thread):
     def __init__(self, config:Config, memberTree, nami: Nami, sepa: Sepa):
@@ -102,8 +103,16 @@ class App(ttk.Frame):
                                                 command=self.nami_login)
         self.loginButton.grid(row=4, column=0, padx=0, pady=5, sticky="nsew")
 
-        self.dpsgImage = tk.PhotoImage(file='dpsg_logo.png')
-        self.dpsgImageLabel = ttk.Label(master=self.frame_login, image=self.dpsgImage, anchor="w")
+        # get path to image. Do it this way to allow the correct image path search with pyinstaller
+        try:
+            # Get the absolute path of the temp directory
+            pathToDpsgLogo = path.abspath(path.join(path.dirname(__file__), 'img/dpsg_logo.png'))
+            # Set the dpsg logo
+            self.dpsgImage = tk.PhotoImage(file=pathToDpsgLogo)
+            self.dpsgImageLabel = ttk.Label(master=self.frame_login, image=self.dpsgImage, anchor="w")
+        except:
+            self.dpsgImageLabel = ttk.Label(master=self.frame_login, text='', anchor="w")
+
         self.dpsgImageLabel.grid(row=5, column=0, padx=0, pady=(5,0))
 
         # ============ accountingFrame ============
@@ -138,7 +147,12 @@ class App(ttk.Frame):
         self.mandatePathEntry.grid(row=7, column=0, padx=0, pady=5)
         self.mandatePathButton = ttk.Button(master=self.accountingFrame, text="Öffnen", command=self.position_path_open_dialog)
         self.mandatePathButton.grid(row=7, column=1, padx=0, pady=5)
-
+        self.generateLabel = ttk.Label(master=self.accountingFrame, text="Generierung", anchor="w")
+        self.generateLabel.grid(row=8, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
+        self.sepaVar = IntVar()
+        self.sepaVar.set(0)
+        self.sepaCheckbox = ttk.Checkbutton(master=self.accountingFrame, text="SEPA XML", onvalue=1, offvalue=0, variable=self.sepaVar)
+        self.sepaCheckbox.grid(row=9, column=0, padx=0, pady=5)
 
         self.startButton = ttk.Button(master=self, style="Accent.TButton",
                                                 text="Start",
@@ -304,6 +318,11 @@ class App(ttk.Frame):
             process.start()
             self.monitor(process)
 
+            # Write SEPA XML file
+            if self.sepaVar.get() == 1:
+                success = self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
+                if success is False:
+                    logging.error('SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
 
     def on_closing(self, event=0):
         del self._nami
@@ -339,6 +358,7 @@ class App(ttk.Frame):
             self.treeview_sort_column(tv, _col, not reverse))
 
     def validate_iban(self, event=0):
+        pass
         try:
             iban = IBAN(self.creditorIbanEntry.get())
             self.creditorIbanEntry.state(['!invalid'])
@@ -368,8 +388,15 @@ class App(ttk.Frame):
 
 def main():
     root = tk.Tk()
-    root.title("Nami Beitragsrechner")
-    root.iconbitmap("favicon.ico")
+    root.title("Nami Beitragsrechner Version 0.1")
+
+    try:
+        # Get the absolute path of the temp directory
+        pathToDpsgIcon = path.abspath(path.join(path.dirname(__file__), 'img/favicon.ico'))
+        # Set the DPSG Logo as icon
+        root.iconbitmap(pathToDpsgIcon)
+    except:
+        pass
 
     sv_ttk.set_theme("light")
 

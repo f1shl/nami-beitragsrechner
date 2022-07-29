@@ -1,5 +1,4 @@
 import csv
-from schwifty import IBAN, BIC
 from vr_import import VRImport, VRMandat
 import tools
 import datetime
@@ -10,6 +9,7 @@ import logging
 import tkinter as tk
 from nami import Nami
 from sepa import Sepa
+from schwifty import IBAN, BIC
 
 # Set the loglevel of pdfplumber to warning to avoid unnecessary log messages
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -217,12 +217,6 @@ class NamiAccounting:
                            datetime.datetime.strftime(member.correct_eintrittsdatum, self._config.get_datetime_format()),
                            member.kontoverbindung.iban, str(beitragsatz) + ' €')
             self._memberTree.insert('', tk.END, values=memberTuple)
-
-
-        # Write SEPA XML file
-        success = self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
-        if success is False:
-            tools.print_error('SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
 
         # Info printing
         used = vrImport.get_nof_used_mandate()

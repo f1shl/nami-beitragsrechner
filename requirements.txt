@@ -1,5 +1,4 @@
-schwifty~=2021.10.2
-colorama
+schwifty>=2022.7.0
 termcolor~=1.1.0
 marshmallow~=3.14.1
 pdfplumber~=0.6.0
