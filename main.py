@@ -341,9 +341,9 @@ class App(ttk.Frame):
         logging.debug('Konfiguration gespeichert')
 
     def monitor(self, thread):
-        if thread.is_alive():
+        while thread.is_alive():
             # check the thread every 100ms
-            self.after(100, lambda: self.monitor(thread))
+            self._parent.update()
 
     def treeview_sort_column(self, tv, col, reverse):
         l = [(tv.set(k, col), k) for k in tv.get_children('')]
