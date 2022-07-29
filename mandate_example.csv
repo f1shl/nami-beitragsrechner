@@ -1,0 +1,3 @@
+Bezeichnung;Mandatsreferenz;Mandatsdatum;Lastschriftsequenz;Zahler Name;Zahler Vorname;Zahler IBAN;Zahler BIC;Mandatsstatus
+498647;498647;15.10.2017;wiederkehrende Lastschrift;Max Mustermann;;DE02120300000000202051;BYLADEM1001;aktiv
+897464;897464;15.11.2017;erstmalige Lastschrift;Anna Mustermann;;DE02500105170137075030;INGDDEFF;aktiv

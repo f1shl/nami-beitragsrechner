@@ -3,7 +3,6 @@
 config.ini
 invoices/
 *.pdf
-*.csv
 *.xml
 
 ### Python template
