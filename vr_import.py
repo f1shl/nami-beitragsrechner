@@ -77,6 +77,8 @@ class VRMandat:
         else:
             return False
 
+    def get_for_treeview(self) -> tuple:
+        return ('', self.mandatsreferenz, self.nachname + " " + self.vorname, self.mandatsdatum, '', self.bic, self.iban)
 
 class VRImport:
     def __init__(self, csv_path):

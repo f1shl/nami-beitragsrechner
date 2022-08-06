@@ -13,6 +13,8 @@ from tkcalendar import Calendar, DateEntry
 from sepa import Sepa
 from schwifty import IBAN, BIC
 from os import path
+from treeViewEdit import TableEdit
+from vr_import import VRImport, VRMandat
 
 class RunAccounting(Thread):
     def __init__(self, config:Config, memberTree, nami: Nami, sepa: Sepa):
@@ -23,6 +25,15 @@ class RunAccounting(Thread):
         self.m.process()
 
 
+class MenuBar(tk.Menu):
+    def __init__(self, master):
+        super().__init__(master=master)
+        self._filemenu = tk.Menu(self)
+        self._filemenu.add_command(label="Importiere Mandate", command=master.importMandate)
+        self._filemenu.add_command(label="Speichern")
+        self.add_cascade(label="Datei", menu=self._filemenu)
+
+
 class App(ttk.Frame):
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent)
@@ -30,6 +41,10 @@ class App(ttk.Frame):
         # Init
         self._nami = None
         self._sepa = None
+
+        # Create the menu bar
+        self._menuBar = MenuBar(self)
+        parent.config(menu=self._menuBar)
 
         parent.protocol("WM_DELETE_WINDOW", self.on_closing)
         # Bind shortcuts
@@ -232,32 +247,36 @@ class App(ttk.Frame):
         self.validate_iban()
 
         # ============ frame_members ============
+        self.memberNotebook = ttk.Notebook(self)
+        self.memberNotebook.bind("<<NotebookTabChanged>>", self.enableCorrectScrollbar)
+        self.memberNotebook.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=(10, 0))
+
         columns = ('member_number', 'first_name', 'last_name', 'start_date', 'iban', 'fee')
-        self.memberTree = ttk.Treeview(master=self, columns=columns, show='headings')
-        self.memberTree.heading('member_number', text='Mitgliedsnummer', command=lambda _col='member_number': \
-                self.treeview_sort_column(self.memberTree, _col, False))
-        self.memberTree.heading('first_name', text='Vorname', command=lambda _col='first_name': \
-                self.treeview_sort_column(self.memberTree, _col, False))
-        self.memberTree.heading('last_name', text='Nachname', command=lambda _col='last_name': \
-                self.treeview_sort_column(self.memberTree, _col, False))
-        self.memberTree.heading('start_date', text='Eintrittsdatum', command=lambda _col='start_date': \
-                self.treeview_sort_column(self.memberTree, _col, False))
-        self.memberTree.heading('iban', text='IBAN', command=lambda _col='iban': \
-                self.treeview_sort_column(self.memberTree, _col, False))
-        self.memberTree.heading('fee', text='Beitrag', command=lambda _col='fee': \
-                self.treeview_sort_column(self.memberTree, _col, False))
+        readableNames = ('Mitgliedsnummer', 'Vorname', 'Nachname', 'Eintrittsdatum', 'IBAN', 'Beitrag')
+        self.memberTree = TableEdit(master=self.memberNotebook, columns=columns, readableNames=readableNames, editable=False)
+
         self.memberTree.column("member_number", stretch="no", width=120)
         self.memberTree.column("first_name", stretch="yes", minwidth=120)
         self.memberTree.column("last_name", stretch="yes", minwidth=150)
         self.memberTree.column("start_date", stretch="no", width=100)
         self.memberTree.column("iban", stretch="no", width=170)
         self.memberTree.column("fee", stretch="no", width=80)
-        self.memberTree.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=(10, 0))
-
+        self.memberNotebook.add(self.memberTree, text='Mitglieder')
         # add a scrollbar
         self.memberScrollbar = ttk.Scrollbar(master=self, orient=tk.VERTICAL, command=self.memberTree.yview)
         self.memberTree.configure(yscroll=self.memberScrollbar.set)
-        self.memberScrollbar.grid(row=0, column=2, padx=(0,10), pady=(10,0), sticky='ns')
+        self.memberScrollbar.grid(row=0, column=2, padx=(0, 10), pady=(51, 0), sticky='ns')
+
+
+        # ============= frame_mandate ===========
+        columns = ('member_number', 'mandat_reference', 'name', 'date', 'bank', 'bic', 'iban')
+        readableNames = ('Mitgliedsnummer', 'Mandatsreferenz', 'Name', 'Austellungsdatum', 'Kreditinstitut', 'BIC', 'IBAN')
+        self.mandateTree = TableEdit(master=self.memberNotebook, columns=columns, readableNames=readableNames, editable=True)
+        self.memberNotebook.add(self.mandateTree, text='Mandate')
+        # add a scrollbar
+        self.mandateScrollbar = ttk.Scrollbar(master=self, orient=tk.VERTICAL, command=self.mandateTree.yview)
+        self.mandateTree.configure(yscroll=self.mandateScrollbar.set)
+        self.mandateScrollbar.grid(row=0, column=2, padx=(0,10), pady=(51,0), sticky='ns')
 
         # ============ frame_logging ============
         # Logging configuration
@@ -265,6 +284,16 @@ class App(ttk.Frame):
         # Add the handler to logger
         logger = logging.getLogger()
         logger.addHandler(self.frame_logging.logging_handler)
+
+    def enableCorrectScrollbar(self, event):
+        if self.memberNotebook.index(self.memberNotebook.select()) == 0:
+            self.memberScrollbar.grid()
+            self.mandateScrollbar.grid_remove()
+            self.memberScrollbar.tkraise()
+        elif self.memberNotebook.index(self.memberNotebook.select()) == 1:
+            self.mandateScrollbar.grid()
+            self.memberScrollbar.grid_remove()
+            self.mandateScrollbar.tkraise()
 
     def nami_login(self):
         username = self.usernameEntry.get()
@@ -345,18 +374,6 @@ class App(ttk.Frame):
             # check the thread every 100ms
             self._parent.update()
 
-    def treeview_sort_column(self, tv, col, reverse):
-        l = [(tv.set(k, col), k) for k in tv.get_children('')]
-        l.sort(reverse=reverse)
-
-        # rearrange items in sorted positions
-        for index, (val, k) in enumerate(l):
-            tv.move(k, '', index)
-
-        # reverse sort next time
-        tv.heading(col, command=lambda _col=col: \
-            self.treeview_sort_column(tv, _col, not reverse))
-
     def validate_iban(self, event=0):
         pass
         try:
@@ -386,6 +403,17 @@ class App(ttk.Frame):
         except:
             return False
 
+    def importMandate(self):
+        v = VRImport(self.mandatePathEntry.get())
+
+        self.memberNotebook.select(1)
+        self.enableCorrectScrollbar(0)
+        for m in v.mandate:
+            self.mandateTree.insert('', tk.END, values=m.get_for_treeview())
+
+        logging.debug(str(v.get_nof_mandate()) + ' Mandate erfolgreich aus der CSV Datei importiert.')
+
+
 def main():
     root = tk.Tk()
     root.title("Nami Beitragsrechner Version 0.1")
@@ -407,7 +435,7 @@ def main():
 
     width, height = root.winfo_width(), root.winfo_height()
     width = 1110
-    height = 735
+    height = 785
     x = int((root.winfo_screenwidth() / 2) - (width / 2))
     y = int((root.winfo_screenheight() / 2) - (height / 2))
 
