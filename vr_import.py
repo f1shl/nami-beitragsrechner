@@ -4,15 +4,15 @@ import tools
 
 class VRMandat:
     headerdict = {
-        "Bezeichnung" : 0,
-        "Mandatsreferenz" : 0,
-        "Mandatsdatum" : 0,
-        "Lastschriftsequenz" : 0,
-        "Zahler Name" : 0,
-        "Zahler Vorname" : 0,
-        "Zahler IBAN" : 0,
-        "Zahler BIC" : 0,
-        "Mandatsstatus" : 0
+        "Bezeichnung": 0,
+        "Mandatsreferenz": 0,
+        "Mandatsdatum": 0,
+        "Lastschriftsequenz": 0,
+        "Zahler Name": 0,
+        "Zahler Vorname": 0,
+        "Zahler IBAN": 0,
+        "Zahler BIC": 0,
+        "Mandatsstatus": 0
     }
 
     def __init__(self, header, csv_row):
@@ -53,7 +53,7 @@ class VRMandat:
         # Do the compare this way, as it is not ensured that the first name and the surname are in the same order
         # in both databases
         if sorted(combinedName.split()) == sorted(nameCleaned.split()):
-           return True
+            return True
 
         return False
 
@@ -72,7 +72,7 @@ class VRMandat:
 
     def is_first_lastschrift(self):
         if 'erstmalige' in self.lastschriftsequenz and \
-           'vorbereitet' in self.mandatsstatus:
+                'vorbereitet' in self.mandatsstatus:
             return True
         else:
             return False
@@ -81,7 +81,7 @@ class VRMandat:
 class VRImport:
     def __init__(self, csv_path):
         self.mandate = []
-        with open(csv_path, 'r', newline='') as f:
+        with open(csv_path, 'r', newline='', encoding='iso-8859-1') as f:
             reader = csv.reader(f, delimiter=';')
             header = []
             # read each row and create VRMandat object from it
@@ -98,16 +98,28 @@ class VRImport:
             raise Exception('VR-Networld Mandatenliste ' + csv_path + ' ist leer. Bitte nochmal überprüfen.')
 
     def find_correct_mandat(self, member) -> VRMandat:
-        # Try to find correct Mandat
+        # Try to find correct Mandate
+        matched_mandate = []
+        # Get all mandate which match the ID or the name and IBAN from the member
         for mandat in self.mandate:
-            # Check for correct name of Kontoinhaber and IBAN
-            # Both should be enough to get the correct Mandat
-            if mandat.check_name(member.kontoverbindung.kontoinhaber) and \
-               mandat.check_iban(member.kontoverbindung.iban):
+            if mandat.bezeichnung == str(member.id) or \
+                    (mandat.check_name(member.kontoverbindung.kontoinhaber) and mandat.check_iban(
+                        member.kontoverbindung.iban)):
+                matched_mandate.append(mandat)
+
+        # First check: If ID is the same and the IBAN, use the Mandat
+        for mandat in matched_mandate:
+            if mandat.bezeichnung == str(member.id) and mandat.check_iban(member.kontoverbindung.iban):
                 mandat.used = True
                 return mandat
 
-        combinedName = member.vorname + ' ' + member.nachname
+        # Second check: If Name and IBAN is the same, use the Mandat
+        for mandat in matched_mandate:
+            if mandat.check_name(member.kontoverbindung.kontoinhaber) and mandat.check_iban(
+                    member.kontoverbindung.iban):
+                mandat.used = True
+                return mandat
+
         return None
 
     def get_nof_used_mandate(self):

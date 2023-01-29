@@ -64,7 +64,8 @@ class NamiAccounting:
 
         print('Herunterladen aller aktiven Mitglieder aus der Nami...')
         result = self._nami.get_active_members()
-
+        result_schnupper = self._nami.get_schnupper_members()
+        result.extend(result_schnupper)
         #print(tabulate2x(result))
 
         # Error variables
@@ -75,7 +76,7 @@ class NamiAccounting:
         list_of_members_booked_here_but_not_by_dpsg = []
         list_of_members_wrong_sepa = []
         # Wenn für 2021 abgebucht wird, so darf kein Mitglied von 2022 gebucht werden
-        list_of_members_this_year_schnupper = []
+        list_of_members_active_schnupper = []
         nof_claimed_members = 0  # Zähler, wieviele Mitglieder gebucht werden
         booking_value = 0
         # Create CsvWriter
@@ -99,9 +100,9 @@ class NamiAccounting:
                     list_of_corrupt_activities.append(member)
                     continue
                 # Last activity in list is the oldest one
-                if 'Schnupper' in activities[-1].taetigkeit:
+                if 'Schnupper' in activities[0].taetigkeit:
                     member.correct_eintrittsdatum = member.eintrittsdatum + self._config.get_schnupper_weeks()
-                    list_of_members_this_year_schnupper.append(member)
+                    list_of_members_active_schnupper.append(member)
 
             # Check for correct IBAN and BIC. The following object instantiations raising a ValueError, if BIC or IBAN is wrong
             try:
@@ -139,6 +140,13 @@ class NamiAccounting:
                 raise ValueError(
                     'Beitragsart ' + member.beitragsart + ' von Mitglied ' + combinedName + ' unbekannt.')
 
+            if member.eintrittsdatum > self._config.get_key_date_second_half():
+                list_of_members_in_new_year.append(member)
+
+            # Check if member entered the following here. If so, ignore it.
+            # Here the corrected Eintrittsdatum is decisive (Schnuppermitglieder must be handeled correctly)
+            if member.correct_eintrittsdatum > self._config.get_key_date_second_half():
+                continue
             # Check if the member entry date was after the stichtag. If so, only half of the membership fee is claimed
             b = self._config.get_accounting_halfyear()
             if b == tools.BookingHalfYear.FIRST:
@@ -147,28 +155,16 @@ class NamiAccounting:
                 elif member.correct_eintrittsdatum > self._config.get_key_date_frist_half() and \
                    member.correct_eintrittsdatum <= self._config.get_key_date_second_half():
                     list_of_members_second_half_of_year.append(member)
-                # Check if member entered in the following year. If so, no claiming should be done
-                elif member.correct_eintrittsdatum > self._config.get_key_date_second_half():
-                    list_of_members_in_new_year.append(member)
-                    continue
             elif b == tools.BookingHalfYear.SECOND:
                 if member.correct_eintrittsdatum > self._config.get_key_date_frist_half() and \
                    member.correct_eintrittsdatum <= self._config.get_key_date_second_half():
                     list_of_members_second_half_of_year.append(member)
-                # Check if member entered in the following year. If so, no claiming should be done
-                elif member.correct_eintrittsdatum > self._config.get_key_date_second_half():
-                    list_of_members_in_new_year.append(member)
-                    continue
             else:
                 if member.correct_eintrittsdatum > self._config.get_key_date_frist_half() and \
                    member.correct_eintrittsdatum <= self._config.get_key_date_second_half():
                     beitragsatz = beitragsatz / 2
                     list_of_members_second_half_of_year.append(member)
                     b = tools.BookingHalfYear.SECOND
-                # Check if member entered in the following year. If so, no claiming should be done
-                elif member.correct_eintrittsdatum > self._config.get_key_date_second_half():
-                    list_of_members_in_new_year.append(member)
-                    continue
 
             # Now compare with DPSG invoice and remove from list
             tmp = len(dpsg_members)
@@ -218,6 +214,7 @@ class NamiAccounting:
                            member.kontoverbindung.iban, str(beitragsatz) + ' €')
             self._memberTree.insert('', tk.END, values=memberTuple)
 
+
         # Info printing
         used = vrImport.get_nof_used_mandate()
         overall = vrImport.get_nof_mandate()
@@ -254,7 +251,7 @@ class NamiAccounting:
         tools.print_info('-------------------------------------------------------------------------------')
         print("")
 
-        self.print_member_entry_this_year_as_schnupper(list_of_members_this_year_schnupper)
+        self.print_member_entry_this_year_as_schnupper(list_of_members_active_schnupper)
         #self.print_member_entry_second_half(list_of_members_second_half_of_year)
         self.print_member_entry_new_year(list_of_members_in_new_year)
 
@@ -286,13 +283,13 @@ class NamiAccounting:
         print("")
 
     def print_member_entry_this_year_as_schnupper(self, members):
-        tools.print_info('-------------- Schnuppermitglieder Jahr ' + str(self._config.get_accounting_year()) + ' --------------')
+        tools.print_info('-------------- Aktive Schnuppermitglieder Jahr --------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------')
+        tools.print_info('-------------------------------------------------------------')
         print("")
 
     def print_member_entry_second_half(self, members):

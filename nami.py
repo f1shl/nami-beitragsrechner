@@ -41,6 +41,14 @@ class Nami:
             'mglTypeId': 'MITGLIED'
         }
         return self._nami.search(**search)
+    def get_schnupper_members(self):
+        # Suchmaske für alle aktiven Mitglieder. Hier werden keine inaktiven, noch die Schnuppermitglieder gefunden
+        # Die Nami muss also zuvor gepflegt werden, bevor der Export geschehen kann
+        search = {
+            'mglStatusId': 'AKTIV',
+            'mglTypeId': 'SCHNUPPER_MITGLIED'
+        }
+        return self._nami.search(**search)
 
     def get_nami_interface(self) -> NaMi:
         return self._nami
