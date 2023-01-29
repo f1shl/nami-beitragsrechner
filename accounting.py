@@ -86,7 +86,7 @@ class NamiAccounting:
         for r in result:
             row = []
             member = r.get_mitglied(self._nami.get_nami_interface())
-            combinedName = member.vorname + ' ' + member.nachname
+            combined_name = member.vorname + ' ' + member.nachname
             member.correct_eintrittsdatum = member.eintrittsdatum
 
             # If member entered the claimed year, check for Schnuppermitgliedschaft to extract the correct entry date
@@ -95,7 +95,7 @@ class NamiAccounting:
                     activities = self._nami.get_nami_interface().mgl_activities(member.id)
                 except exceptions.ValidationError as e:
                     tools.print_error(
-                        'Mitglied ' + combinedName + ': Enddatum scheint für die Schnuppermitgliedschaft nicht zu stimmen. ' + str(
+                        'Mitglied ' + combined_name + ': Enddatum scheint für die Schnuppermitgliedschaft nicht zu stimmen. ' + str(
                             e))
                     list_of_corrupt_activities.append(member)
                     continue
@@ -104,18 +104,19 @@ class NamiAccounting:
                     member.correct_eintrittsdatum = member.eintrittsdatum + self._config.get_schnupper_weeks()
                     list_of_members_active_schnupper.append(member)
 
-            # Check for correct IBAN and BIC. The following object instantiations raising a ValueError, if BIC or IBAN is wrong
+            # Check for correct IBAN and BIC. The following object instantiations raising a ValueError,
+            # if BIC or IBAN is wrong
             try:
                 IBAN(member.kontoverbindung.iban)
             except ValueError as e:
-                tools.print_error('IBAN nicht korrekt für Mitglied ' + combinedName + ' Error: ' + str(e))
-                raise ValueError('IBAN nicht korrekt für Mitglied ' + combinedName + ' Error: ' + str(e))
+                tools.print_error('IBAN nicht korrekt für Mitglied ' + combined_name + ' Error: ' + str(e))
+                raise ValueError('IBAN nicht korrekt für Mitglied ' + combined_name + ' Error: ' + str(e))
 
             try:
                 BIC(member.kontoverbindung.bic)
             except ValueError as e:
-                tools.print_error('BIC nicht korrekt für Mitglied ' + combinedName + ' Error: ' + str(e))
-                raise ValueError('BIC nicht korrekt für Mitglied ' + combinedName + ' Error: ' + str(e))
+                tools.print_error('BIC nicht korrekt für Mitglied ' + combined_name + ' Error: ' + str(e))
+                raise ValueError('BIC nicht korrekt für Mitglied ' + combined_name + ' Error: ' + str(e))
 
             row.append(member.mitgliedsNummer)
             row.append(member.nachname)
@@ -136,9 +137,9 @@ class NamiAccounting:
                 beitragsatz = self._config.get_membership_fees().get_fee_social()
             else:
                 tools.print_error(
-                    'Beitragsart ' + member.beitragsart + ' von Mitglied ' + combinedName + ' unbekannt.')
+                    'Beitragsart ' + member.beitragsart + ' von Mitglied ' + combined_name + ' unbekannt.')
                 raise ValueError(
-                    'Beitragsart ' + member.beitragsart + ' von Mitglied ' + combinedName + ' unbekannt.')
+                    'Beitragsart ' + member.beitragsart + ' von Mitglied ' + combined_name + ' unbekannt.')
 
             if member.eintrittsdatum > self._config.get_key_date_second_half():
                 list_of_members_in_new_year.append(member)
@@ -179,7 +180,7 @@ class NamiAccounting:
 
             # Now search for the correct Mandat in Mandatenliste
             mandat = vrImport.find_correct_mandat(member)
-            if mandat == None:
+            if mandat is None:
                 list_of_missing_mandat.append(member)
                 continue
 
@@ -194,7 +195,8 @@ class NamiAccounting:
 
             # Create Verwendungszweck
             d = DesignatedUse()
-            verwendungszweck = d.get_designated_use(self._config.get_accounting_year(), b, beitragsart, combinedName)
+            verwendungszweck = d.get_designated_use(self._config.get_accounting_year(), b, beitragsart, combined_name)
+            verwendungszweck = tools.replace_umlaute_and_s(verwendungszweck)
             row.append(verwendungszweck)
             # Write to CSV file
             writer.writerow(row)

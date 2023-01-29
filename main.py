@@ -38,6 +38,11 @@ class App(ttk.Frame):
         # Read Config
         self._config = Config('config.ini')
 
+        # Read some stuff from the theme (colors and font)
+        self._color_foreground = '#fafafa'
+        self._color_background = '1c1c1c'
+        self._color_disabled_foreground = '#a0a0a0'
+        self._color_selected_foreground = '#ffffff'
         # Set the global datetime format
         self._config.set_datetime_format('%d.%m.%Y')
         # ============ create two frames ============
@@ -135,7 +140,11 @@ class App(ttk.Frame):
 
         self.bookingDateLabel = ttk.Label(master=self.accountingFrame, text="Fälligkeitsdatum", anchor="w")
         self.bookingDateLabel.grid(row=4, column=0, columnspan=2, padx=0, pady=(5,0), sticky="nsew")
-        self.bookingDateCalendar = DateEntry(self.accountingFrame, selectmode='none', date_pattern='dd.mm.yyyy')
+        self.bookingDateCalendar = DateEntry(self.accountingFrame, selectmode='none', date_pattern='dd.mm.yyyy',
+                                             font='SunValleyBodyFont', foreground=self._color_foreground,
+                                             background=self._color_background,
+                                             disabledforeground=self._color_disabled_foreground,
+                                             selectedforeground=self._color_selected_foreground)
         self.bookingDateCalendar.set_date(self._config.get_accounting_date())
         self.bookingDateCalendar.grid(row=5, column=0, columnspan=2, padx=0, pady=5, sticky="nsew")
 

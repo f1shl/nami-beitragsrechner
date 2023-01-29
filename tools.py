@@ -12,6 +12,14 @@ def print_info(text):
     logging.info(text)
 
 
+def replace_umlaute_and_s(s : str) -> str:
+    s = s.replace('ä', 'ae')
+    s = s.replace('ö', 'oe')
+    s = s.replace('ü', 'ue')
+    s = s.replace('ß', 'ss')
+    return s
+
+
 class BookingHalfYear(IntEnum):
     FIRST = 1
     SECOND = 2

@@ -38,21 +38,21 @@ class VRMandat:
         self.nachname = csv_row[self.headerdict["Zahler Name"]]
         # remove any colons
         self.nachname = self.nachname.replace(',', ' ')
-        self.nachname = self.replace_umlaute_and_s(self.nachname)
+        self.nachname = tools.replace_umlaute_and_s(self.nachname)
         self.vorname = csv_row[self.headerdict["Zahler Vorname"]]
         self.vorname = self.vorname.replace(',', ' ')
-        self.vorname = self.replace_umlaute_and_s(self.vorname)
+        self.vorname = tools.replace_umlaute_and_s(self.vorname)
 
         self.iban = csv_row[self.headerdict["Zahler IBAN"]]
         self.bic = csv_row[self.headerdict["Zahler BIC"]]
         self.mandatsstatus = csv_row[self.headerdict["Mandatsstatus"]]
 
     def check_name(self, name):
-        combinedName = self.nachname + " " + self.vorname
-        nameCleaned = self.replace_umlaute_and_s(name)
+        combined_name = self.nachname + " " + self.vorname
+        name_cleaned = tools.replace_umlaute_and_s(name)
         # Do the compare this way, as it is not ensured that the first name and the surname are in the same order
         # in both databases
-        if sorted(combinedName.split()) == sorted(nameCleaned.split()):
+        if sorted(combined_name.split()) == sorted(name_cleaned.split()):
             return True
 
         return False
@@ -62,13 +62,6 @@ class VRMandat:
             return True
         else:
             return False
-
-    def replace_umlaute_and_s(self, str) -> str:
-        str = str.replace('ä', 'ae')
-        str = str.replace('ö', 'oe')
-        str = str.replace('ü', 'ue')
-        str = str.replace('ß', 'ss')
-        return str
 
     def is_first_lastschrift(self):
         if 'erstmalige' in self.lastschriftsequenz and \
