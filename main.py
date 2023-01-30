@@ -397,7 +397,7 @@ class App(ttk.Frame):
 
 def main():
     root = tk.Tk()
-    root.title("Nami Beitragsrechner Version 0.1")
+    root.title("Nami Beitragsrechner Version 0.2")
 
     try:
         # Get the absolute path of the temp directory
