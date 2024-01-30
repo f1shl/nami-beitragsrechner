@@ -1,6 +1,7 @@
 import logging
 from tkinter import END, Text, ttk
 
+
 class LoggingHandlerFrame(ttk.LabelFrame):
 
     class Handler(logging.Handler):

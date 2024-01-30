@@ -37,7 +37,7 @@ class CsvWriter:
 
 
 class DesignatedUse:
-    def get_designated_use(self, accounting_year, bookingHalfYear:tools.BookingHalfYear, beitragsart, name):
+    def get_designated_use(self, accounting_year, bookingHalfYear: tools.BookingHalfYear, beitragsart, name):
         if bookingHalfYear == tools.BookingHalfYear.FIRST:
             year_str = '1/' + str(accounting_year)
         elif bookingHalfYear == tools.BookingHalfYear.SECOND:
@@ -49,7 +49,7 @@ class DesignatedUse:
 
 
 class NamiAccounting:
-    def __init__(self, config:tools.Config, memberTree, nami:Nami, sepa:Sepa):
+    def __init__(self, config: tools.Config, memberTree, nami:Nami, sepa:Sepa):
         self._config = config
         self._memberTree = memberTree
         self._nami = nami
@@ -305,9 +305,8 @@ class NamiAccounting:
         tools.print_info('------------------------------------------------------------------------')
         print("")
 
-
     def print_member_entry_new_year(self, members):
-        tools.print_info('--------------------- Mitglieder im neuen Jahr ' + str(self._config.get_accounting_year()+1) + ' --------------------')
+        tools.print_info('--------------------- Mitglieder im neuen Jahr ' + str(self._config.get_accounting_year() + 1) + ' --------------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
@@ -341,7 +340,7 @@ class NamiAccounting:
         year_start_date = datetime.date(self._config.get_accounting_year(), 1,1)
         billing_sum = 0
         members_overall = []
-        Path('./invoices/').mkdir(parents=True, exist_ok=True)
+        Path('../invoices/').mkdir(parents=True, exist_ok=True)
 
         nami = self._nami.get_nami_interface()
         groupId = nami.grpId
