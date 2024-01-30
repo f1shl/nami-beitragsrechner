@@ -23,6 +23,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
+        submodules: 'true' 
     - name: Install dependencies and build script
       run: |
         python -m pip install --upgrade pip
