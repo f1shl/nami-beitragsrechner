@@ -30,7 +30,7 @@ class LoggingHandlerFrame(ttk.LabelFrame):
         self.columnconfigure(1, weight=0)
         self.rowconfigure(0, weight=1)
 
-        self.text = Text(self, bd=0, selectbackground=f'#F0F0F0')
+        self.text = Text(self, bd=0, selectbackground='#F0F0F0')
         self.text.grid(row=0, column=0, sticky="nsew")
 
         self.logging_handler = LoggingHandlerFrame.Handler(self.text)
