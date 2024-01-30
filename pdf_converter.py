@@ -45,6 +45,13 @@ class PdfMemberList(list):
 
         return len(unqiue_members)
 
+    def get_value_booked_by_dpsg(self) -> float:
+        overall_value = 0
+        for m in self:
+            overall_value += m.beitrag
+
+        return overall_value
+
 
 class PdfConverter:
 
@@ -59,15 +66,20 @@ class PdfConverter:
             for p in range(1, len(pdf.pages)):
                 page = pdf.pages[p]
                 lines = list(filter(None, page.extract_text(layout=True).splitlines()))
-                # Search for header line
-                i = 0
-                while 'Mitgliedsnr. Name' not in lines[i]:
-                    i = i+1
-                lines = lines[i+1:-1]
+                # Strip leading and trailing spaces
+                lines = list(map(str.strip, lines))
+                # Remove empty lines
+                lines = list(filter(None, lines))
+                # Remove all lines which are not a member line
+                lines = [x for x in lines if 'Einzelnachweise:' not in x]
+                lines = [x for x in lines if 'Mitgliedsnr. Name' not in x]
+                lines = [x for x in lines if 'Rechnungsnr.:' not in x]
                 overall_lines.extend(lines)
 
         for line in overall_lines:
             line = line.strip()
+            if line == '':
+                continue
             # Extract mglNo
             pos = line.find(' ')
             mglNo = int(line[:pos])

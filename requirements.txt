@@ -9,7 +9,6 @@ future
 Pygments
 docutils
 cffi
-PySide6
 Pillow
 pip
 toml
@@ -18,5 +17,6 @@ Wand
 chardet
 pycparser
 setuptools
-pynami
+./pynami
 sepaxml
+pyinstaller
