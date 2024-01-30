@@ -1,5 +1,5 @@
 from sepaxml import SepaDD
-import datetime, uuid
+import datetime
 import xml.etree.ElementTree as ET
 import logging
 

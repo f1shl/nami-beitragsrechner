@@ -1,1 +1,4 @@
-pyinstaller --onefile --windowed --upx-dir "C:\upx-3.96-win64" --icon="img\favicon.ico" --collect-data sv_ttk --collect-data pycountry --copy-metadata schwifty --hidden-import babel.numbers --add-data="C:\Users\Username\AppData\Local\Programs\Python\Python39\Lib\site-packages\schwifty\bank_registry\;bank_registry" --add-data="C:\Users\Username\AppData\Local\Programs\Python\Python39\Lib\site-packages\schwifty\iban_registry\;iban_registry" --add-data="img\dpsg_logo.png;img" --add-data="img\favicon.ico;img" main.py
+./init_venv.ps1
+.venv/bin/activate
+pyinstaller main.spec
+deactivate
