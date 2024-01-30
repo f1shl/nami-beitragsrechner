@@ -43,8 +43,9 @@ jobs:
         path: dist/*
     - name: Build Windows OS
       if: matrix.os == 'windows-latest'
+      shell: powershell
       run: |
-        powershell build_executable_win.ps1
+        ./build_executable_win.ps1
     - uses: actions/upload-artifact@v3
       with:
         name: "nami-beitragsrechner-win"
