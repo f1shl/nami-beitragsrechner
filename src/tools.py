@@ -1,3 +1,4 @@
+import sys
 import logging
 import configparser
 from enum import IntEnum
@@ -60,6 +61,7 @@ class MembershipFees:
     def get_fee_social_annual(self):
         return self._feeSocial
 
+
 class SepaWrapper:
     def __init__(self, name, iban, bic, id):
         self.name = name
@@ -76,7 +78,11 @@ class Config:
         self.update_config()
 
     def save(self):
-        with open('config.ini', 'w') as configfile:
+        save_path = '../config.ini'
+        # Different path if application got build
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            save_path = 'config.ini'
+        with open(save_path, 'w') as configfile:
             self._config.write(configfile)
 
     def get_nami_username(self):
