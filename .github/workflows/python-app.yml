@@ -13,8 +13,12 @@ permissions:
 jobs:
   build:
 
-    runs-on: macos-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'macos-latest']
+        
     steps:
     - uses: actions/checkout@v3
       with:
@@ -23,13 +27,21 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
-    - name: Install dependencies and build script
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8
+    - name: Build Mac OS
+      run: |
         bash build_executable_mac.sh
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
+        if: matrix.os == 'macos-latest'
+    - name: Build Windows OS
+      run: |
+        powershell build_executable_win.ps1
+        if: matrix.os == 'windows-latest'
+    - name: Collect Artifacts
     - uses: actions/upload-artifact@v3
       with:
         name: "nami-beitragsrechner"
