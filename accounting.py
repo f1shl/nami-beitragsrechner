@@ -61,7 +61,7 @@ class NamiAccounting:
         # e.g. Removes first half year entries if second half year shall be booked
         dpsg_members = self.download_invoices()
         nof_dpsg_members = dpsg_members.get_nof_unique_members()
-
+        booking_value_dpsg = dpsg_members.get_value_booked_by_dpsg()
         print('Herunterladen aller aktiven Mitglieder aus der Nami...')
         result = self._nami.get_active_members()
         result_schnupper = self._nami.get_schnupper_members()
@@ -243,14 +243,15 @@ class NamiAccounting:
         print("")
         tools.print_info('Verarbeitete Mandate:         ' + str(overall))
         tools.print_info('Benutzte     Mandate:         ' + str(used) + '/' + str(overall))
-        tools.print_info('Gesamtsumme: ' + str(booking_value) + ' EUR')
+        tools.print_info(f'Buchungssumme DPSG:  {booking_value_dpsg: .2f}  €')
+        tools.print_info(f'Buchungssumme Stamm: {booking_value: .2f} €')
         print("")
         if not_used == 0:
             tools.print_info('Alle SEPA-Mandate wurden erfolgreich verwendet.')
         else:
             tools.print_error(
                 'Nicht alle SEPA-Mandate wurden verwendet. Nochmal die Mandate überprüfen und ggf. bereinigen.')
-        tools.print_info('-------------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
         self.print_member_entry_this_year_as_schnupper(list_of_members_active_schnupper)
@@ -269,7 +270,7 @@ class NamiAccounting:
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_error('Mitgliedsnummer: ' + str(m.mitgliedsNummer) + ' Name: ' + combinedName)
-        tools.print_error('-----------------------------------------------------------------------------')
+        tools.print_error('------------------------------------------------------------------------')
         if len(members) != 0:
             tools.print_error('Bitte die fehlenden Mandate in VR Networld für die Mitglieder anlegen.')
         print("")
@@ -279,19 +280,19 @@ class NamiAccounting:
         for m in mandate:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_error('Mandatsreferenz: ' + m.mandatsreferenz + ' Name: ' + combinedName)
-        tools.print_error('-------------------------------------------------------------------------------')
+        tools.print_error('------------------------------------------------------------------------')
         if len(mandate) != 0:
             tools.print_error('Bitte nochmal die DPSG Nami und VR-Networld überprüfen und die nicht verwendenten Mandate entfernen.')
         print("")
 
     def print_member_entry_this_year_as_schnupper(self, members):
-        tools.print_info('-------------- Aktive Schnuppermitglieder Jahr --------------')
+        tools.print_info('-------------------- Aktive Schnuppermitglieder Jahr -------------------')
         for m in members:
             combinedName = m.vorname + ' ' + m.nachname
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('-------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
     def print_member_entry_second_half(self, members):
@@ -301,7 +302,7 @@ class NamiAccounting:
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('-----------------------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
 
@@ -312,7 +313,7 @@ class NamiAccounting:
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
     def print_member_booked_by_dpsg_but_not_here(self, members):
@@ -322,7 +323,7 @@ class NamiAccounting:
             tools.print_info('Rechnungsdatum: ' + datetime.datetime.strftime(m.datumVon, self._config.get_datetime_format()) +
                              ' - ' + datetime.datetime.strftime(m.datumBis, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
     def print_member_not_booked_by_dpsg(self, members):
@@ -332,7 +333,7 @@ class NamiAccounting:
             tools.print_info('Initiales Eintrittsdatum: ' + datetime.datetime.strftime(m.eintrittsdatum, self._config.get_datetime_format()) +
                              ' Abrechenbares Eintrittsdatum: ' + datetime.datetime.strftime(m.correct_eintrittsdatum, self._config.get_datetime_format()) +
                              ' Mitglied ' + combinedName)
-        tools.print_info('------------------------------------------------------------------------------------')
+        tools.print_info('------------------------------------------------------------------------')
         print("")
 
     def download_invoices(self) -> PdfMemberList:

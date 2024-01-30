@@ -1,0 +1,3 @@
+[submodule "pynami"]
+	path = pynami
+	url = https://github.com/sscholz93/pynami.git
