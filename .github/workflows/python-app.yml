@@ -37,14 +37,17 @@ jobs:
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
         if: matrix.os == 'macos-latest'
+    - uses: actions/upload-artifact@v3
+      with:
+        name: "nami-beitragsrechner-mac"
+        path: dist/*
     - name: Build Windows OS
       run: |
         powershell build_executable_win.ps1
         if: matrix.os == 'windows-latest'
-    - name: Collect Artifacts
     - uses: actions/upload-artifact@v3
       with:
-        name: "nami-beitragsrechner"
+        name: "nami-beitragsrechner-win"
         path: dist/*
     - name: Lint with flake8
       run: |
