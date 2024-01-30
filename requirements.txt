@@ -17,6 +17,5 @@ Wand
 chardet
 pycparser
 setuptools
-./pynami
 sepaxml
-pyinstaller
+./pynami
