@@ -33,18 +33,18 @@ jobs:
         pip install flake8
     - name: Build Mac OS
       run: |
+        if: matrix.os == 'macos-latest'
         bash build_executable_mac.sh
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
-        if: matrix.os == 'macos-latest'
     - uses: actions/upload-artifact@v3
       with:
         name: "nami-beitragsrechner-mac"
         path: dist/*
     - name: Build Windows OS
       run: |
-        powershell build_executable_win.ps1
         if: matrix.os == 'windows-latest'
+        powershell build_executable_win.ps1
     - uses: actions/upload-artifact@v3
       with:
         name: "nami-beitragsrechner-win"
