@@ -38,7 +38,7 @@ jobs:
         bash build_executable_mac.sh
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
-    - uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
       with:
         name: nami-beitragsrechner-mac
         path: dist/*.
@@ -47,7 +47,7 @@ jobs:
       shell: powershell
       run: |
         ./build_executable_win.ps1
-    - uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
       with:
         name: nami-beitragsrechner-win
         path: dist/*.exe
