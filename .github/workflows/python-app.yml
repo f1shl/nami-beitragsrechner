@@ -36,8 +36,8 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         bash build_executable_mac.sh
-        # Now flag the created file as unix executable
-        chmod +x "dist/Nami Beitragsrechner"
+    - name: Create Executable
+      run: chmod +x "dist/Nami Beitragsrechner"
     - name: Upload Mac OS binaries
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
