@@ -72,17 +72,14 @@ class SepaWrapper:
 
 class Config:
     def __init__(self, configPath):
+        self._config_path = configPath
         self._config = configparser.ConfigParser()
         self._config.read(configPath)
         # Update ensures that all necessary fields are avialable in the config ini file
         self.update_config()
 
     def save(self):
-        save_path = '../config.ini'
-        # Different path if application got build
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            save_path = 'config.ini'
-        with open(save_path, 'w') as configfile:
+        with open(self._config_path, 'w') as configfile:
             self._config.write(configfile)
 
     def get_nami_username(self):

@@ -1,14 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import copy_metadata
-import platform
+#import site
 
-python_version = platform.python_version()
-last_dot = python_version.rfind('.')
-python_version = python_version[0:last_dot]
+#site_packages_path = site.getsitepackages()
 datas = [('img/dpsg_logo.png', 'img'), ('img/favicon.ico', 'img')]
-datas.append((f'.venv/lib/python{python_version}/site-packages/schwifty/bank_registry/', 'bank_registry'))
-datas.append((f'.venv/lib/python{python_version}/site-packages/schwifty/iban_registry/', 'iban_registry'))
+#datas.append((f'{site_packages_path[1]}/schwifty/bank_registry/', 'bank_registry'))
+#datas.append((f'{site_packages_path[1]}/schwifty/iban_registry/', 'iban_registry'))
 datas += collect_data_files('sv_ttk')
 datas += collect_data_files('pycountry')
 datas += collect_data_files('schwifty')
