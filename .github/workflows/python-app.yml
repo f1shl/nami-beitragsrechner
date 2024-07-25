@@ -38,18 +38,20 @@ jobs:
         bash build_executable_mac.sh
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
-    - uses: actions/upload-artifact@v4
+    - name: Upload Mac OS binaries
       if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4
       with:
         name: nami-beitragsrechner-mac
-        path: dist/*.
+        path: dist/*
     - name: Build Windows OS
       if: matrix.os == 'windows-latest'
       shell: powershell
       run: |
         ./build_executable_win.ps1
-    - uses: actions/upload-artifact@v4
+    - name: Upload Windows OS binaries
       if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
       with:
         name: nami-beitragsrechner-win
         path: dist/*.exe
