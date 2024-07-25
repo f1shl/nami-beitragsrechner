@@ -4,7 +4,6 @@ marshmallow
 pdfplumber
 sv_ttk
 tkcalendar
-
 future
 Pygments
 docutils
@@ -19,3 +18,5 @@ pycparser
 setuptools
 sepaxml
 ./pynami
+
+pyinstaller

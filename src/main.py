@@ -39,7 +39,7 @@ class App(ttk.Frame):
         self._parent.bind('<Control-s>', self.save)
 
         # Read Config
-        self._config = Config('config.ini')
+        self._config = Config('../config.ini')
 
         # Read some stuff from the theme (colors and font)
         self._color_foreground = '#fafafa'

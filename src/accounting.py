@@ -85,7 +85,12 @@ class NamiAccounting:
         # Loop through all members
         for r in result:
             row = []
-            member = r.get_mitglied(self._nami.get_nami_interface())
+            try:
+                member = r.get_mitglied(self._nami.get_nami_interface())
+            except exceptions.ValidationError as e:
+                tools.print_error('Fehler beim Laden von Mitglied ' + e.data.get('vorname') + ' ' + e.data.get('nachname') + ': ' + e.messages)
+                continue
+
             combined_name = member.vorname + ' ' + member.nachname
             member.correct_eintrittsdatum = member.eintrittsdatum
 
