@@ -18,18 +18,20 @@ from os import path
 
 
 class RunAccounting(Thread):
-    def __init__(self, config: Config, memberTree, nami: Nami, sepa: Sepa):
+    def __init__(self, config_path: str, config: Config, memberTree, nami: Nami, sepa: Sepa):
         super().__init__()
-        self.m = NamiAccounting(config, memberTree, nami, sepa)
+        self.m = NamiAccounting(config_path, config, memberTree, nami, sepa)
 
     def run(self):
         self.m.process()
 
 
 class App(ttk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, root_path: str):
         ttk.Frame.__init__(self, parent)
         self._parent = parent
+        self._root_path = root_path
+        
         # Init
         self._nami = None
         self._sepa = None
@@ -39,7 +41,12 @@ class App(ttk.Frame):
         self._parent.bind('<Control-s>', self.save)
 
         # Read Config
-        self._config = Config('../config.ini')
+        self._config_root_path = self._root_path
+        if getattr(sys, 'frozen', False):
+            self._config_root_path = path.dirname(sys.executable)
+        
+        config_path = path.join(self._config_root_path, 'config.ini')
+        self._config = Config(config_path)
 
         # Read some stuff from the theme (colors and font)
         self._color_foreground = '#fafafa'
@@ -115,11 +122,7 @@ class App(ttk.Frame):
         # get path to image. Do it this way to allow the correct image path search with pyinstaller
         try:
             # Get the absolute path of the temp directory
-            pathToDpsgLogo = path.abspath(path.join(path.dirname(__file__), '../img/dpsg_logo.png'))
-            # Different folder, if application got build
-            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-                pathToDpsgLogo = path.abspath(path.join(path.dirname(__file__), 'img/dpsg_logo.png'))
-
+            pathToDpsgLogo = path.join(self._root_path, 'img/dpsg_logo.png')
             # Set the dpsg logo
             self.dpsgImage = tk.PhotoImage(file=pathToDpsgLogo)
             self.dpsgImageLabel = ttk.Label(master=self.frame_login, image=self.dpsgImage, anchor="w")
@@ -291,11 +294,14 @@ class App(ttk.Frame):
     def nami_login(self):
         username = self.usernameEntry.get()
         password = self.passwordEntry.get()
+        self.config(cursor="watch")
+        self.update()
         nami = Nami(username, password)
         self._nami = None
         if nami.check_login():
             self._nami = nami
-
+        self.config(cursor="")
+        
     def position_path_open_dialog(self):
         filetypes = (('csv files', '*.csv'),)
         filePath = filedialog.askopenfilename(title='VR-Networld Mandate Pfad', filetypes=filetypes)
@@ -336,7 +342,7 @@ class App(ttk.Frame):
                 logging.error('Gläubiger Identifikation inkorrekt. Bitte nochmal die Daten überprüfen.')
                 return
 
-            process = RunAccounting(self._config, self.memberTree, self._nami, self._sepa)
+            process = RunAccounting(self._config_root_path, self._config, self.memberTree, self._nami, self._sepa)
             process.start()
             self.monitor(process)
 
@@ -415,9 +421,16 @@ def main():
     root = tk.Tk()
     root.title("Nami Beitragsrechner Version 0.2")
 
+    # Get the root path of the executable or main.py script
+    # Get the absolute path of the temp directory
+    root_path = path.abspath(path.join(path.dirname(__file__), '../'))
+    # Different folder, if application got build
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        root_path = path.abspath(path.dirname(__file__))
+        
     try:
         # Get the absolute path of the temp directory
-        pathToDpsgIcon = path.abspath(path.join(path.dirname(__file__), '../img/favicon.ico'))
+        pathToDpsgIcon = path.join(root_path, 'img/favicon.ico')
         # Set the DPSG Logo as icon
         root.iconbitmap(pathToDpsgIcon)
     except:
@@ -425,7 +438,7 @@ def main():
 
     sv_ttk.set_theme("light")
 
-    app = App(root)
+    app = App(root, root_path)
     app.pack(fill="both", expand=True)
 
     root.update_idletasks()  # Make sure every screen redrawing is done
