@@ -21,11 +21,11 @@ jobs:
         os: ['windows-latest', 'macos-latest']
         
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Set up Python 3.12
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.12"
     - name: Install dependencies
@@ -38,19 +38,19 @@ jobs:
         bash build_executable_mac.sh
         # Now flag the created file as unix executable
         chmod +x "dist/Nami Beitragsrechner"
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: "nami-beitragsrechner-mac"
-        path: dist/*
+        name: nami-beitragsrechner-mac
+        path: dist/*.
     - name: Build Windows OS
       if: matrix.os == 'windows-latest'
       shell: powershell
       run: |
         ./build_executable_win.ps1
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: "nami-beitragsrechner-win"
-        path: dist/*
+        name: nami-beitragsrechner-win
+        path: dist/*.exe
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
