@@ -1,9 +1,11 @@
+import sys
 import csv
 from vr_import import VRImport, VRMandat
 import tools
 import datetime
 from marshmallow import exceptions
 from pdf_converter import PdfConverter, PdfMemberList
+from os import path
 from pathlib import Path
 import logging
 import tkinter as tk
@@ -49,7 +51,8 @@ class DesignatedUse:
 
 
 class NamiAccounting:
-    def __init__(self, config: tools.Config, memberTree, nami:Nami, sepa:Sepa):
+    def __init__(self, config_path: str, config: tools.Config, memberTree, nami:Nami, sepa:Sepa):
+        self._config_path = config_path
         self._config = config
         self._memberTree = memberTree
         self._nami = nami
@@ -344,8 +347,10 @@ class NamiAccounting:
         print('Herunterladen aller Rechnungen aus der Nami...')
         year_start_date = datetime.date(self._config.get_accounting_year(), 1,1)
         billing_sum = 0
-        members_overall = []
-        Path('../invoices/').mkdir(parents=True, exist_ok=True)
+        members_overall = []            
+        invoice_path = path.join(self._config_path, 'invoices')
+        print(invoice_path)
+        Path(invoice_path).mkdir(parents=True, exist_ok=True)
 
         nami = self._nami.get_nami_interface()
         groupId = nami.grpId
@@ -355,7 +360,7 @@ class NamiAccounting:
             if n.reDatum >= year_start_date:
                 billing_sum = billing_sum + float(n.reNetto[:-4].replace(',', '.'))
                 invoice = nami.invoice(groupId, n.id)
-                filename = './invoices/' + str(n.id)+'.pdf'
+                filename = path.join(invoice_path, str(n.id)+'.pdf')
                 nami.download_invoice(n.id, open_file=False, save_file=True, filename=filename)
                 members = PdfConverter.convert(pdfpath=filename)
                 members_overall.extend(members)
