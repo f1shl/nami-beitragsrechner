@@ -1,4 +1,4 @@
-schwifty>=2022.7.0
+schwifty
 termcolor
 marshmallow
 pdfplumber
