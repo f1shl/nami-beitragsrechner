@@ -1,9 +1,11 @@
 import sys
+import platform
 import tkinter as tk
 from tkinter import ttk, filedialog, IntVar
 import sv_ttk
 import logging
 import LoggingHandlerFrame as loggingFrame
+import version
 from accounting import NamiAccounting
 from threading import Thread
 from nami import Nami
@@ -286,7 +288,7 @@ class App(ttk.Frame):
 
         # ============ frame_logging ============
         # Logging configuration
-        logging.basicConfig(filename='test.log', level=logging.DEBUG)
+        logging.basicConfig(filename=path.join(self._config_root_path, 'log.log'), level=logging.DEBUG)
         # Add the handler to logger
         logger = logging.getLogger()
         logger.addHandler(self.frame_logging.logging_handler)
@@ -419,7 +421,7 @@ class App(ttk.Frame):
 
 def main():
     root = tk.Tk()
-    root.title("Nami Beitragsrechner Version 0.2")
+    root.title("Nami Beitragsrechner Version " + version.__version__)
 
     # Get the root path of the executable or main.py script
     # Get the absolute path of the temp directory
@@ -430,7 +432,11 @@ def main():
         
     try:
         # Get the absolute path of the temp directory
-        pathToDpsgIcon = path.join(root_path, 'img/favicon.ico')
+        if platform.system() == "Windows":
+            pathToDpsgIcon = path.join(root_path, 'img/favicon.ico')
+        else:
+            pathToDpsgIcon = path.join(root_path, 'img/favicon.icns')
+
         # Set the DPSG Logo as icon
         root.iconbitmap(pathToDpsgIcon)
     except:

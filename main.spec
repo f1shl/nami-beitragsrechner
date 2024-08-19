@@ -2,9 +2,10 @@
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import copy_metadata
 #import site
+import platform
 
 #site_packages_path = site.getsitepackages()
-datas = [('img/dpsg_logo.png', 'img'), ('img/favicon.ico', 'img')]
+datas = [('img/dpsg_logo.png', 'img'), ('img/favicon.ico', 'img'), ('img/favicon.icns', 'img')]
 #datas.append((f'{site_packages_path[1]}/schwifty/bank_registry/', 'bank_registry'))
 #datas.append((f'{site_packages_path[1]}/schwifty/iban_registry/', 'iban_registry'))
 datas += collect_data_files('sv_ttk')
@@ -15,6 +16,10 @@ datas += copy_metadata('schwifty')
 
 block_cipher = None
 
+if platform.system() == "Windows":
+    iconPath = 'img/favicon.ico'
+else:
+    iconPath = 'img/favicon.icns'
 
 a = Analysis(
     ['src//main.py'],
@@ -40,7 +45,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='nami-beitragsrechner',
+    name='Nami Beitragsrechner',
     debug=False,
     manifest=None,
     bootloader_ignore_signals=False,
@@ -52,13 +57,12 @@ exe = EXE(
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
-    codesign_identity=None,
     entitlements_file=None,
-    icon=['img/favicon.ico'],
+    icon=iconPath,
 )
 app = BUNDLE(
     exe,
     name='Nami Beitragsrechner.app',
-    icon='img/favicon.ico',
-    bundle_identifier='com.nami-beitragsrechner',
+    icon=iconPath,
+    bundle_identifier='com.dpsg.nami-beitragsrechner',
 )
