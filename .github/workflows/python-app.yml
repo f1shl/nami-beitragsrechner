@@ -46,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: nami-beitragsrechner-mac
-        path: dist/*
+        path: dist/*.dmg
     - name: Build Windows OS
       if: matrix.os == 'windows-latest'
       shell: powershell
