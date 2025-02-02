@@ -1,5 +1,7 @@
 import sys
 import csv
+import tkinter.messagebox
+
 from vr_import import VRImport, VRMandat
 import tools
 import datetime
@@ -25,8 +27,16 @@ class CsvWriter:
                'IBAN Zielkonto', 'BIC Zielkonto', 'Betrag in EUR', 'Mandatsreferenz',
                'Mandatsdatum', 'Termin', 'SEPA-Lastschriftsequenz', 'Verwendungszweck']
 
-    def __init__(self, year):
-        self._filename = 'MitgliederAbrechnung_' + str(year) + '.csv'
+    def __init__(self, save_path: Path, year: int, halfyear: tools.BookingHalfYear):
+        self._filename = str(save_path / Path('MitgliederAbrechnung_' + str(year) + '_' + str(int(halfyear)) + '.csv'))
+
+        if Path(self._filename).exists():
+            ans = tkinter.messagebox.askquestion("Datei überschreiben?", f"{self._filename} existiert bereits. Überschreiben?")
+            if ans == 'no':
+                i = 1
+                while Path(self._filename).exists():
+                    self._filename = str(save_path / Path('MitgliederAbrechnung_' + str(year) + '_' + str(int(halfyear)) + f' ({i}).csv'))
+                    i = i + 1
         # Do this to truncate existing content
         with open(self._filename, 'w', newline='') as f:
             pass
@@ -83,7 +93,7 @@ class NamiAccounting:
         nof_claimed_members = 0  # Zähler, wieviele Mitglieder gebucht werden
         booking_value = 0
         # Create CsvWriter
-        writer = CsvWriter(self._config.get_accounting_year())
+        writer = CsvWriter(self._config.get_save_path(), self._config.get_accounting_year(), self._config.get_accounting_halfyear())
 
         # Loop through all members
         for r in result:

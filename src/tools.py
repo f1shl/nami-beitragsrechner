@@ -3,7 +3,7 @@ import logging
 import configparser
 from enum import IntEnum
 import datetime
-
+from pathlib import Path
 
 def print_error(text):
     logging.error(text)
@@ -73,10 +73,14 @@ class SepaWrapper:
 class Config:
     def __init__(self, configPath):
         self._config_path = configPath
+        # Check if configpath folder exist. If not, create
+        Path(configPath).parent.mkdir(parents=True, exist_ok=True)
+
         self._config = configparser.ConfigParser()
         self._config.read(configPath)
-        # Update ensures that all necessary fields are avialable in the config ini file
+        # Update ensures that all necessary fields are available in the config ini file
         self.update_config()
+        self.save()
 
     def save(self):
         with open(self._config_path, 'w') as configfile:
@@ -90,15 +94,18 @@ class Config:
 
     def set_nami_username(self, username):
         self._config['Nami Login']['Username'] = username
+        self.save()
 
     def set_nami_password(self, password):
         self._config['Nami Login']['Password'] = password
+        self.save()
 
     def get_accounting_year(self):
         return int(self._config['General']['Accounting Year'])        # Jahr für das die Beiträge eingezogen werden sollen
 
     def set_accounting_year(self, year):
         self._config['General']['Accounting Year'] = str(year)
+        self.save()
 
     def get_accounting_date(self) -> datetime:
         return datetime.datetime.strptime(self._config['General']['Booking Date'], '%d.%m.%Y')                # Format in TT.MM.JJJJ. Termin zur SEPA Lastschriftausführung
@@ -108,18 +115,28 @@ class Config:
 
     def set_accounting_date(self, date:datetime):
         self._config['General']['Booking Date'] = date.strftime('%d.%m.%Y')              # Format in TT.MM.JJJJ. Termin zur SEPA Lastschriftausführung
+        self.save()
 
     def get_accounting_halfyear(self) -> BookingHalfYear:
         return BookingHalfYear(int(self._config['General']['Accounting Half-Year']))
 
     def set_accounting_halfyear(self, period:BookingHalfYear):
         self._config['General']['Accounting Half-Year'] = str(period)
+        self.save()
 
     def get_position_file(self) -> str:
         return self._config['General']['Mandate Path']
 
     def set_position_file(self, path:str):
         self._config['General']['Mandate Path'] = path
+        self.save()
+
+    def get_save_path(self) -> str:
+        return self._config['General']['Save Path']
+
+    def set_save_path(self, path:str):
+        self._config['General']['Save Path'] = path
+        self.save()
 
     def get_membership_fees(self) -> MembershipFees:
         return MembershipFees(self.get_accounting_halfyear(), float(self._config['Membership Fee']['Full']),
@@ -130,6 +147,7 @@ class Config:
         self._config['Membership Fee']['Full'] = str(fees.get_fee_full_annual())
         self._config['Membership Fee']['Family'] = str(fees.get_fee_family_annual())
         self._config['Membership Fee']['Social'] = str(fees.get_fee_social_annual())
+        self.save()
 
     def get_key_date_frist_half(self) -> datetime.date:
         # Get the accounting year first
@@ -156,6 +174,7 @@ class Config:
             self._config.set('General', 'Datetime format')
         datetimeFormat = datetimeFormat.replace('%', '%%') # Use double percent char to escape the basic inteprolation method of ConfigParser
         self._config['General']['Datetime format'] = datetimeFormat
+        self.save()
 
     def get_creditor_id(self) -> SepaWrapper:
         return SepaWrapper(self._config['Creditor ID']['name'], self._config['Creditor ID']['iban'],
@@ -166,7 +185,7 @@ class Config:
         self._config['Creditor ID']['iban'] = sepa.iban
         self._config['Creditor ID']['bic'] = sepa.bic
         self._config['Creditor ID']['id'] = sepa.id
-
+        self.save()
 
     def update_config(self):
         if (self._config.has_section('Nami Login')) is False:
@@ -193,6 +212,8 @@ class Config:
             self._config.set('General', 'booking date', datetime.date.today().strftime('%d.%m.%Y'))
         if (self._config.has_option('General', 'mandate path')) is False:
             self._config.set('General', 'mandate path', '')
+        if (self._config.has_option('General', 'save path')) is False:
+            self._config.set('General', 'save path', '')
         if (self._config.has_option('General', 'datetime format')) is False:
             self._config.set('General', 'datetime format', '%%d.%%m.%%Y')
 
