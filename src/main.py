@@ -1,5 +1,6 @@
 import sys
 import platform
+import tkinter
 import tkinter as tk
 from tkinter import ttk, filedialog, IntVar
 import sv_ttk
@@ -10,6 +11,8 @@ from accounting import NamiAccounting
 from threading import Thread
 from nami import Nami
 from tools import Config, BookingHalfYear, MembershipFees, SepaWrapper
+import platformdirs
+from pathlib import Path
 
 print = logging.info
 import datetime as dt
@@ -33,7 +36,11 @@ class App(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self._parent = parent
         self._root_path = root_path
-        
+
+        # App and Authorname
+        appname = "NamiBeitragsrechner"
+        authorname = "DPSG"
+
         # Init
         self._nami = None
         self._sepa = None
@@ -43,9 +50,9 @@ class App(ttk.Frame):
         self._parent.bind('<Control-s>', self.save)
 
         # Read Config
-        self._config_root_path = self._root_path
-        if getattr(sys, 'frozen', False):
-            self._config_root_path = path.dirname(sys.executable)
+        self._config_root_path = platformdirs.user_data_dir(appname=appname, appauthor=authorname)
+        #if getattr(sys, 'frozen', False):
+        #    self._config_root_path = path.dirname(sys.executable)
         
         config_path = path.join(self._config_root_path, 'config.ini')
         self._config = Config(config_path)
@@ -163,7 +170,7 @@ class App(ttk.Frame):
                                              selectedforeground=self._color_selected_foreground)
         self.bookingDateCalendar.set_date(self._config.get_accounting_date())
         self.bookingDateCalendar.grid(row=5, column=0, columnspan=2, padx=0, pady=5, sticky="nsew")
-
+        #Mandate folder
         self.mandatePathLabel = ttk.Label(master=self.accountingFrame, text="Mandate Pfad", anchor="w")
         self.mandatePathLabel.grid(row=6, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
         self.mandatePathVar = tk.StringVar(self)
@@ -173,13 +180,24 @@ class App(ttk.Frame):
         self.mandatePathButton = ttk.Button(master=self.accountingFrame, text="Öffnen",
                                             command=self.position_path_open_dialog)
         self.mandatePathButton.grid(row=7, column=1, padx=0, pady=5)
+        # Output folder
+        self.savePathLabel = ttk.Label(master=self.accountingFrame, text="Speicher Pfad", anchor="w")
+        self.savePathLabel.grid(row=8, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
+        self.savePathVar = tk.StringVar(self)
+        self.savePathVar.set(self._config.get_save_path())
+        self.savePathEntry = ttk.Entry(master=self.accountingFrame, textvariable=self.savePathVar)
+        self.savePathEntry.grid(row=9, column=0, padx=0, pady=5)
+        self.savePathButton = ttk.Button(master=self.accountingFrame, text="Öffnen",
+                                            command=self.save_path_open_dialog)
+        self.savePathButton.grid(row=9, column=1, padx=0, pady=5)
+
         self.generateLabel = ttk.Label(master=self.accountingFrame, text="Generierung", anchor="w")
-        self.generateLabel.grid(row=8, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
+        self.generateLabel.grid(row=10, column=0, columnspan=2, padx=0, pady=(5, 0), sticky="nsew")
         self.sepaVar = IntVar()
         self.sepaVar.set(0)
         self.sepaCheckbox = ttk.Checkbutton(master=self.accountingFrame, text="SEPA XML", onvalue=1, offvalue=0,
                                             variable=self.sepaVar)
-        self.sepaCheckbox.grid(row=9, column=0, padx=0, pady=5)
+        self.sepaCheckbox.grid(row=11, column=0, padx=0, pady=5)
 
         self.startButton = ttk.Button(master=self, style="Accent.TButton",
                                       text="Start",
@@ -306,9 +324,17 @@ class App(ttk.Frame):
         
     def position_path_open_dialog(self):
         filetypes = (('csv files', '*.csv'),)
-        filePath = filedialog.askopenfilename(title='VR-Networld Mandate Pfad', filetypes=filetypes)
-        self._config.set_position_file(filePath)
-        self.mandatePathVar.set(filePath)
+        filepath = filedialog.askopenfilename(title='VR-Networld Mandate Pfad', filetypes=filetypes)
+        if filepath != "":
+            self._config.set_position_file(filepath)
+            self.mandatePathVar.set(filepath)
+
+    def save_path_open_dialog(self):
+        filetypes = (('csv files', '*.csv'),)
+        filepath = filedialog.askdirectory(title='Speicherpfad')
+        if filepath != "":
+            self._config.set_save_path(filepath)
+            self.savePathVar.set(filepath)
 
     def year_option_changed(self, *args):
         self._config.set_accounting_year(self.yearOptionVar.get())
@@ -350,7 +376,18 @@ class App(ttk.Frame):
 
             # Write SEPA XML file
             if self.sepaVar.get() == 1:
-                success = self._sepa.export('sepa_' + str(self._config.get_accounting_year()) + '.xml')
+                filepath = str(Path(self._config.get_save_path()) / Path('sepa_' + str(self._config.get_accounting_year()) +
+                                                                     '_' + str(int(self._config.get_accounting_halfyear())) + '.xml'))
+                if Path(filepath).exists():
+                    ans = tkinter.messagebox.askquestion("Datei überschreiben?",
+                                                         f"{filepath} existiert bereits. Überschreiben?")
+                    if ans == 'no':
+                        i = 1
+                        while Path(filepath).exists():
+                            filepath = str(Path(self._config.get_save_path()) / Path('sepa_' + str(self._config.get_accounting_year()) +
+                                                                         '_' + str(int(self._config.get_accounting_halfyear())) + f' ({i}).xml'))
+                            i = i + 1
+                success = self._sepa.export(filepath)
                 if success is False:
                     logging.error(
                         'SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
@@ -451,7 +488,7 @@ def main():
 
     width, height = root.winfo_width(), root.winfo_height()
     width = 1110
-    height = 735
+    height = 800
     x = int((root.winfo_screenwidth() / 2) - (width / 2))
     y = int((root.winfo_screenheight() / 2) - (height / 2))
 

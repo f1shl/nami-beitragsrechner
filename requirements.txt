@@ -18,5 +18,5 @@ pycparser
 setuptools
 sepaxml
 ./pynami
-
+platformdirs==4.3.6
 pyinstaller
