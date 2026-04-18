@@ -74,7 +74,7 @@ class VRMandat:
 class VRImport:
     def __init__(self, csv_path):
         self.mandate = []
-        with open(csv_path, 'r', newline='', encoding='iso-8859-1') as f:
+        with open(csv_path, 'r', newline='', encoding='utf-8-sig') as f:
             reader = csv.reader(f, delimiter=';')
             header = []
             # read each row and create VRMandat object from it
