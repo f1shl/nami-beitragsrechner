@@ -355,7 +355,7 @@ class NamiAccounting:
 
     def download_invoices(self) -> PdfMemberList:
         print('Herunterladen aller Rechnungen aus der Nami...')
-        year_start_date = datetime.date(self._config.get_accounting_year(), 1,1)
+        year_start_date = datetime.date(self._config.get_accounting_year(), 1, 1)
         billing_sum = 0
         members_overall = []            
         invoice_path = path.join(self._config_path, 'invoices')

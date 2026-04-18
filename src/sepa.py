@@ -1,31 +1,34 @@
-from sepaxml import SepaDD
+from sepaxml import SepaDD, validation
 import datetime
 import xml.etree.ElementTree as ET
 import logging
 
 logging.getLogger("xmlschema").setLevel(logging.WARNING)
 
+
 class Sepa:
-    def __init__(self, name, iban, bic, creditorId):
+    def __init__(self, name, iban, bic, creditor_id):
+        self.schema = "pain.008.001.02"
+
         self._config = {
             "name": name,
             "IBAN": ''.join(iban.split()),
             "BIC": bic,
             "batch": True,
-            "creditor_id": creditorId,  # supplied by your bank or financial authority
+            "creditor_id": creditor_id,  # supplied by your bank or financial authority
             "currency": "EUR",  # ISO 4217
             # "instrument": "B2B"  # - default is CORE (B2C)
         }
-        self._sepa = SepaDD(self._config, schema="pain.008.001.02", clean=True)
+        self._sepa = SepaDD(self._config, schema=self.schema, clean=True)
 
-    def add_member(self, member, amountEur, mandat, collectionDate, verwendungszweck) -> bool:
+    def add_member(self, member, amount_eur, mandat, collection_date, verwendungszweck) -> bool:
         payment = {
             "name": member.kontoverbindung.kontoinhaber,
             "IBAN": member.kontoverbindung.iban,
             "BIC": member.kontoverbindung.bic,
-            "amount": int(amountEur*100),  # in cents
+            "amount": int(amount_eur*100),  # in cents
             "type": "RCUR",  # FRST,RCUR,OOFF,FNAL
-            "collection_date": datetime.datetime.strptime(collectionDate, '%d.%m.%Y').date(),
+            "collection_date": datetime.datetime.strptime(collection_date, '%d.%m.%Y').date(),
             "mandate_id": str(mandat.mandatsreferenz),
             "mandate_date": datetime.datetime.strptime(mandat.mandatsdatum, '%d.%m.%Y').date(),
             "description": str(verwendungszweck),
@@ -38,9 +41,9 @@ class Sepa:
         except:
             return False
 
-    def export(self, filePath) -> bool:
+    def export(self, filepath) -> bool:
         try:
-            with open(filePath, "w") as text_file:
+            with open(filepath, "w") as text_file:
                 element = ET.fromstring(self._sepa.export(validate=True))
                 ET.indent(element)
                 text_file.write(str(ET.tostring(element, encoding='unicode')))

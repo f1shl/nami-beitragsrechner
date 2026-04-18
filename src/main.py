@@ -1,8 +1,11 @@
+import shutil
 import sys
 import platform
 import tkinter
 import tkinter as tk
 from tkinter import ttk, filedialog, IntVar
+
+import sepaxml.validation
 import sv_ttk
 import logging
 import LoggingHandlerFrame as loggingFrame
@@ -306,10 +309,11 @@ class App(ttk.Frame):
 
         # ============ frame_logging ============
         # Logging configuration
-        logging.basicConfig(filename=path.join(self._config_root_path, 'log.log'), level=logging.DEBUG)
+        logging.basicConfig(filename=path.join(self._config_root_path, 'log.log'), filemode='w', level=logging.DEBUG)
         # Add the handler to logger
         logger = logging.getLogger()
         logger.addHandler(self.frame_logging.logging_handler)
+        logger.handlers[0].flush()
 
     def nami_login(self):
         username = self.usernameEntry.get()
@@ -390,7 +394,17 @@ class App(ttk.Frame):
                 success = self._sepa.export(filepath)
                 if success is False:
                     logging.error(
-                        'SEPA Xml Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
+                        'SEPA XML Generierung schlug fehl. Bitte die Gläubiger Identifikation nochmal überprüfen.')
+                else:
+                    logging.debug(f'SEPA XML {filepath} erfolgreich erzeugt.')
+
+            # Copy logfile
+            src = path.join(self._config_root_path, 'log.log')
+            dst = self._config.get_save_path()
+            shutil.copy(src, dst)
+            
+            # Copy invoices
+            shutil.copytree(path.join(self._config_root_path), self._config.get_save_path(), dirs_exist_ok=True)
 
     def on_closing(self, event=0):
         del self._nami
